@@ -1,0 +1,34 @@
+{
+  "name": "ledger-console",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A single-page financial UI and design-system concept built with React and TypeScript.",
+  "scripts": {
+    "predev": "node scripts/build-tokens.mjs",
+    "dev": "vite",
+    "prebuild": "node scripts/build-tokens.mjs",
+    "build": "tsc --noEmit && vite build && node scripts/build-standalone.mjs",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test scripts/money.test.mjs",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "sync:portfolio": "node scripts/sync-portfolio.mjs"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "^10.6.2",
+    "@storybook/addon-docs": "^10.6.2",
+    "@storybook/react-vite": "^10.6.2",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "storybook": "^10.6.2",
+    "typescript": "~5.7.2",
+    "vite": "^6.4.4"
+  }
+}

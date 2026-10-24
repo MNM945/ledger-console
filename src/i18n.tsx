@@ -1,0 +1,211 @@
+import { createContext, useContext, type ReactNode } from 'react';
+
+export type Locale = 'en' | 'ar';
+export type Direction = 'ltr' | 'rtl';
+
+const en = {
+  skipToResults: 'Skip to results',
+  demoScenario: 'Demo state',
+  scenarioReady: 'Normal',
+  scenarioNetwork: 'Network error',
+  scenarioForbidden: 'Permission denied',
+  scenarioExpired: 'Session expired',
+  forbiddenTitle: 'You don’t have access to this ledger',
+  forbiddenBody: 'Your account needs ledger-view permission. In a live service, ask your account administrator for access. No transaction data is shown. This is a local demo state.',
+  expiredTitle: 'Your session has expired',
+  expiredBody: 'Sign in again in a live service to view transactions. No transaction data is shown. Use the button below to restore this local demo; it does not sign you in to a service.',
+  checkDemoAccess: 'Restore demo access',
+  restoreDemoSession: 'Restore demo session',
+  precisionPolicy: 'Amounts and fees use 2 decimal places for the currencies shown. Rounding happens before totals are calculated; midpoint values round away from zero.',
+  originalDebit: 'Original debit (amount + fee)',
+  fullRefund: 'Full refund',
+  partialRefund: 'Partial refund',
+  refundAmount: 'Principal returned',
+  feeReturned: 'Fee returned',
+  refundCredit: 'Refund credit',
+  netDebit: 'Remaining net debit',
+  refundPolicy: 'Demo policy: original fees are not refunded. Refund credit includes principal and any returned fee. Remaining net debit = original debit − refund credit. This is an illustrative rule.',
+  timelineNotes: {
+    'Instruction received and validated': 'Instruction received and validated',
+    'Sent to payout network': 'Sent to payout network',
+    'Funds confirmed by beneficiary bank': 'Funds confirmed by beneficiary bank',
+    'Rejected: beneficiary account name mismatch': 'Rejected: beneficiary account name mismatch',
+    'Full refund issued at sender request': 'Full refund issued at sender request',
+    'Partial refund issued at sender request': 'Partial refund issued at sender request',
+  },
+
+  appTitle: 'Ledger Console',
+  ledgerHeading: 'Transaction ledger',
+  ledgerDescription: 'Track every transaction, fee and status across your markets.',
+  demoData: 'Demo data',
+  totalRecords: 'Total transactions',
+  allRecords: 'Across the full demo dataset',
+  currencies: 'Currencies',
+  conceptBadge: 'Concept demo — fictional data',
+  language: 'Language',
+  lightMode: 'Light mode',
+  darkMode: 'Dark mode',
+  themeToggle: 'Toggle dark mode',
+  directionToggle: 'Switch to RTL',
+  directionToggleBack: 'Switch to LTR',
+  simulateError: 'Simulate API error',
+  search: 'Search',
+  searchPlaceholder: 'Counterparty or reference…',
+  filterStatus: 'Filter by status',
+  filterCurrency: 'Currency',
+  allCurrencies: 'All currencies',
+  colDate: 'Date',
+  colCounterparty: 'Counterparty',
+  colReference: 'Reference',
+  colAmount: 'Amount',
+  amountSort: 'Amount (grouped by currency; no FX conversion)',
+  moneyUnavailable: 'Amount unavailable',
+  colFee: 'Fee',
+  colTotal: 'Total',
+  colStatus: 'Status',
+  sortAscending: 'sorted ascending',
+  sortDescending: 'sorted descending',
+  sortBy: 'Sort by',
+  loading: 'Loading transactions…',
+  errorTitle: 'Couldn’t load transactions',
+  errorBody: 'The ledger service is unreachable. This is a simulated network error. Retry restores the local demo without changing your filters.',
+  retry: 'Retry',
+  emptyNoDataTitle: 'No transactions yet',
+  emptyNoDataBody: 'When payouts land in this account they will appear here with full fee and status breakdown.',
+  emptyFilteredTitle: 'No matches for these filters',
+  emptyFilteredBody: 'Try widening the status selection or clearing the search query.',
+  clearFilters: 'Clear filters',
+  openDetails: 'View details for',
+  drawerTitle: 'Transaction details',
+  close: 'Close',
+  amount: 'Amount',
+  fee: 'Fee',
+  total: 'Total (amount + fee)',
+  reference: 'Reference',
+  timeline: 'Timeline',
+  status: {
+    settled: 'Settled',
+    processing: 'Processing',
+    failed: 'Failed',
+    refunded: 'Refunded',
+    pending: 'Pending',
+  },
+  results: (n: number) => `${n} transaction${n === 1 ? '' : 's'}`,
+  announceResults: (n: number) => `${n} transactions shown after filtering.`,
+};
+
+export type Strings = typeof en;
+
+// Arabic includes all UI labels and notes in the supplied demo dataset.
+const ar: Strings = {
+  skipToResults: 'الانتقال إلى النتائج',
+  demoScenario: 'حالة العرض التجريبي',
+  scenarioReady: 'عادي',
+  scenarioNetwork: 'خطأ في الشبكة',
+  scenarioForbidden: 'الوصول مرفوض',
+  scenarioExpired: 'انتهت الجلسة',
+  forbiddenTitle: 'ليس لديك إذن للوصول إلى هذا السجل',
+  forbiddenBody: 'يتطلب حسابك إذن عرض السجل. في الخدمة الفعلية، اطلب الوصول من مسؤول الحساب. لا تُعرض بيانات المعاملات. هذه حالة تجريبية محلية.',
+  expiredTitle: 'انتهت صلاحية جلستك',
+  expiredBody: 'في الخدمة الفعلية، سجّل الدخول مجددًا لعرض المعاملات. لا تُعرض بيانات المعاملات. يعيد الزر أدناه تشغيل العرض التجريبي المحلي فقط ولا يسجّل دخولك إلى أي خدمة.',
+  checkDemoAccess: 'استعادة الوصول التجريبي',
+  restoreDemoSession: 'استعادة الجلسة التجريبية',
+  precisionPolicy: 'تُعرض المبالغ والرسوم بمنزلتين عشريتين للعملات المعروضة. يتم التقريب قبل حساب الإجمالي، ويُقرّب النصف بعيدًا عن الصفر.',
+  originalDebit: 'الخصم الأصلي (المبلغ والرسوم)',
+  fullRefund: 'استرداد كامل',
+  partialRefund: 'استرداد جزئي',
+  refundAmount: 'أصل المبلغ المُعاد',
+  feeReturned: 'الرسوم المُعادة',
+  refundCredit: 'إجمالي المبلغ المُعاد',
+  netDebit: 'صافي الخصم المتبقي',
+  refundPolicy: 'سياسة تجريبية: لا تُعاد الرسوم الأصلية. يشمل إجمالي المبلغ المُعاد أصل المبلغ وأي رسوم مُعادة. صافي الخصم المتبقي يساوي الخصم الأصلي ناقص إجمالي المبلغ المُعاد. هذه قاعدة توضيحية.',
+  timelineNotes: {
+    'Instruction received and validated': 'تم استلام التعليمات والتحقق منها',
+    'Sent to payout network': 'أُرسلت إلى شبكة الدفع',
+    'Funds confirmed by beneficiary bank': 'أكّد بنك المستفيد استلام الأموال',
+    'Rejected: beneficiary account name mismatch': 'مرفوضة: اسم حساب المستفيد غير مطابق',
+    'Full refund issued at sender request': 'أُعيد المبلغ كاملًا بناءً على طلب المُرسل',
+    'Partial refund issued at sender request': 'أُعيد جزء من المبلغ بناءً على طلب المُرسل',
+  },
+
+  ledgerHeading: 'سجل المعاملات',
+  ledgerDescription: 'تتبّع المعاملات والرسوم والحالات عبر الأسواق.',
+  demoData: 'بيانات تجريبية',
+  totalRecords: 'إجمالي المعاملات',
+  allRecords: 'جميع البيانات التجريبية',
+  currencies: 'العملات',
+  appTitle: 'وحدة تحكم دفتر الأستاذ',
+  conceptBadge: 'عرض تجريبي — بيانات افتراضية',
+  language: 'اللغة',
+  lightMode: 'الوضع الفاتح',
+  darkMode: 'الوضع الداكن',
+  themeToggle: 'تبديل الوضع الداكن',
+  directionToggle: 'التبديل إلى RTL',
+  directionToggleBack: 'التبديل إلى LTR',
+  simulateError: 'محاكاة خطأ في الواجهة',
+  search: 'بحث',
+  searchPlaceholder: 'الطرف المقابل أو المرجع…',
+  filterStatus: 'تصفية حسب الحالة',
+  filterCurrency: 'العملة',
+  allCurrencies: 'كل العملات',
+  colDate: 'التاريخ',
+  colCounterparty: 'الطرف المقابل',
+  colReference: 'المرجع',
+  colAmount: 'المبلغ',
+  amountSort: 'المبلغ (مجمّع حسب العملة؛ بدون تحويل العملات)',
+  moneyUnavailable: 'المبلغ غير متاح',
+  colFee: 'الرسوم',
+  colTotal: 'الإجمالي',
+  colStatus: 'الحالة',
+  sortAscending: 'مرتّب تصاعديًا',
+  sortDescending: 'مرتّب تنازليًا',
+  sortBy: 'ترتيب حسب',
+  loading: 'جارٍ تحميل المعاملات…',
+  errorTitle: 'تعذّر تحميل المعاملات',
+  errorBody: 'خدمة السجل غير متاحة. هذا خطأ تجريبي في الشبكة. تعيد المحاولة تشغيل العرض المحلي مع الاحتفاظ بعوامل التصفية.',
+  retry: 'إعادة المحاولة',
+  emptyNoDataTitle: 'لا توجد معاملات بعد',
+  emptyNoDataBody: 'عند وصول المدفوعات إلى هذا الحساب ستظهر هنا مع تفاصيل الرسوم والحالة.',
+  emptyFilteredTitle: 'لا توجد نتائج مطابقة',
+  emptyFilteredBody: 'جرّب توسيع اختيار الحالة أو مسح استعلام البحث.',
+  clearFilters: 'مسح عوامل التصفية',
+  openDetails: 'عرض تفاصيل',
+  drawerTitle: 'تفاصيل المعاملة',
+  close: 'إغلاق',
+  amount: 'المبلغ',
+  fee: 'الرسوم',
+  total: 'الإجمالي (المبلغ + الرسوم)',
+  reference: 'المرجع',
+  timeline: 'الجدول الزمني',
+  status: {
+    settled: 'مُسوّاة',
+    processing: 'قيد المعالجة',
+    failed: 'فاشلة',
+    refunded: 'مُستردّة',
+    pending: 'معلّقة',
+  },
+  results: (n: number) => `${n} معاملة`,
+  announceResults: (n: number) => `يتم عرض ${n} معاملة بعد التصفية.`,
+};
+
+const dictionaries: Record<Locale, Strings> = { en, ar };
+
+interface I18nValue {
+  locale: Locale;
+  t: Strings;
+}
+
+const I18nContext = createContext<I18nValue>({ locale: 'en', t: en });
+
+export function I18nProvider({ locale, children }: { locale: Locale; children: ReactNode }) {
+  return <I18nContext.Provider value={{ locale, t: dictionaries[locale] }}>{children}</I18nContext.Provider>;
+}
+
+export function useI18n() {
+  return useContext(I18nContext);
+}
+
+/** Intl locale tag: Arabic with Latin digits keeps financial figures scannable in both directions. */
+export function intlLocale(locale: Locale): string {
+  return locale === 'ar' ? 'ar-u-nu-latn' : 'en-GB';
+}

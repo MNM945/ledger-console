@@ -1,0 +1,45 @@
+/* Semantic mode overrides. Base dark foundation is generated from tokens.json. */
+:root {
+  color-scheme: dark;
+  --lc-color-surface-topbar: #08080def;
+  --lc-color-surface-card-start: #ffffff0b;
+  --lc-color-surface-card-end: #ffffff02;
+  --lc-color-surface-control: #24242466;
+  --lc-color-surface-input: #ffffff1a;
+  --lc-color-surface-input-hover: #ffffff26;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --lc-color-text-primary: #191622;
+  --lc-color-text-secondary: #625b70;
+  --lc-color-text-inverse: #ffffff;
+  --lc-color-surface-page: #f6f5fa;
+  --lc-color-surface-raised: #ffffff;
+  --lc-color-surface-sunken: #eeecf4;
+  --lc-color-surface-overlay-scrim: #19162266;
+  --lc-color-surface-topbar: #fffffff2;
+  --lc-color-surface-card-start: #ffffff;
+  --lc-color-surface-card-end: #f0edf9;
+  --lc-color-surface-control: #eae6f2;
+  --lc-color-surface-input: #f0edf5;
+  --lc-color-surface-input-hover: #e8e3f1;
+  --lc-color-border-default: #ddd7e7;
+  --lc-color-border-strong: #aaa0bb;
+  --lc-color-interactive-primary: #6925f9;
+  --lc-color-interactive-primary-hover: #561bd6;
+  --lc-color-interactive-subtle-bg: #6925f90d;
+  --lc-color-focus-ring: #6925f9;
+  --lc-color-feedback-error-fg: #a42332;
+  --lc-color-feedback-error-bg: #fce8eb;
+  --lc-color-status-settled-fg: #176536;
+  --lc-color-status-settled-bg: #e1f4e7;
+  --lc-color-status-processing-fg: #6126b6;
+  --lc-color-status-processing-bg: #eee5fc;
+  --lc-color-status-failed-fg: #a42332;
+  --lc-color-status-failed-bg: #fce8eb;
+  --lc-color-status-refunded-fg: #795900;
+  --lc-color-status-refunded-bg: #fff3cb;
+  --lc-color-status-pending-fg: #55505f;
+  --lc-color-status-pending-bg: #ece9f0;
+}

@@ -1,0 +1,135 @@
+{
+  "project": {
+    "key": "ledgerconsole",
+    "eyebrow": "// PERSONAL_CONCEPT · FINANCIAL_UI",
+    "title": "Ledger Console",
+    "year": "2026",
+    "role": "Product Design & Front-end Implementation",
+    "time": "Personal concept · October 2026",
+    "intro": "Making financial interface rules inspectable in code",
+    "desc": "A React and TypeScript concept ledger with reusable components, explicit money and refund rules, recovery states, and English/Arabic layouts. All transaction data is fictional.",
+    "insight": "Financial interface quality depends on clear calculation, state and recovery contracts as much as the default screen.",
+    "nextMove": "Validate the ledger tasks with users and confirm provider-owned money, access and refund rules before any production integration.",
+    "conclusion": "A financial interface becomes easier to trust when <strong class=\"article-close-highlight is-insight\">money, state and recovery rules are inspectable</strong>; next, <strong class=\"article-close-highlight is-next\">validate the tasks and provider-owned rules</strong> before production integration.",
+    "signoff": "Thanks for checking the details :)",
+    "stack": [
+      "React",
+      "TypeScript",
+      "CSS",
+      "Storybook"
+    ],
+    "tags": [
+      "Personal Concept",
+      "Design Systems",
+      "Financial UI"
+    ],
+    "coverImg": "assets/ledger-console/ledger-dark.jpg",
+    "thumbnail": "assets/ledger-console/ledger-dark.jpg",
+    "detailImg": null,
+    "github": "https://github.com/MNM945/ledger-console",
+    "demo": "projects/ledger-console/index.html",
+    "buildProject": true,
+    "repoLabel": "MNM945/ledger-console",
+    "cat": "DESIGN SYSTEM · FINANCIAL UI",
+    "accent": "rgba(105,37,249,.18)",
+    "bg": "linear-gradient(135deg,#141419,#08080d)",
+    "phColor": "rgba(105,37,249,.22)",
+    "phSize": "44px",
+    "details": [
+      "<strong class=\"main-title\">Project overview</strong>",
+      "<p class=\"section-intro\">A single ledger page makes <strong>financial UI rules inspectable</strong>: 42 fictional transactions, six currencies and five transaction statuses. This is a personal implementation study, not a client product or a live payment service.</p>",
+      "<strong class=\"main-title\">The problem</strong>",
+      "<p>A polished table can still leave a reviewer unsure which currency an amount belongs to, how a fee affects a total, or what a refunded status actually returns. The page needed to explain <strong>money, status and recovery</strong> together.</p>",
+      "<strong class=\"main-title\">Design decisions</strong>",
+      "<p class=\"component-line\"><span class=\"ct\">Explicit currency</span> Amounts show ISO currency codes. Sorting groups codes before comparing values; <strong>no FX conversion is implied</strong>.</p>",
+      "<p class=\"component-line\"><span class=\"ct\">Precision before totals</span> Decimal midpoint values round away from zero into currency minor units. Totals add integer units, so <strong>display precision and calculation follow the same rule</strong>.</p>",
+      "<p class=\"component-line\"><span class=\"ct\">Refunds have their own breakdown</span> The drawer separates original debit, principal returned, fee returned, refund credit and remaining net debit. Full and partial fixtures use an explicitly labelled <strong>demo policy that retains original fees</strong>.</p>",
+      "<strong class=\"main-title\">Reusable system</strong>",
+      "<p>A generator turns 78 base tokens into CSS properties and typed references. Shared controls and domain components cover filters, amounts, status badges, the transaction table and the focus-managed drawer. <strong>Dark and light modes share one component contract</strong>.</p>",
+      "<p>The visual treatment adapts selected components from a supplied Figma library. The ledger composition and interaction rules are implementation decisions for this concept; the documented mapping is <strong>not automatic Figma synchronization</strong>.</p>",
+      "<strong class=\"main-title\">Recovery and internationalization</strong>",
+      "<p>Network failure, permission denial and session expiry hide the transaction rows and provide local recovery. English and Arabic include the timeline; values use bidirectional isolation and explicit currency codes. Dates are consistently labelled <strong>UTC</strong>.</p>",
+      "<p>Core controls use 44px targets. Statuses combine words and icons. The drawer supports Tab containment, Escape and focus return. A narrow table scrolls inside its own labelled region.</p>",
+      "<strong class=\"main-title\">Validation</strong>",
+      "<p>The audit drove specific fixes: search placeholder contrast rose from 3.04:1 to <strong>6.73:1 dark and 5.58:1 light</strong>, extra monetary precision was removed from fixtures, and blocked states and refund fields became explicit.</p>",
+      "<p>Seven automated money/refund tests and the TypeScript/Vite build pass. Browser checks cover filters, themes, drawer focus and recovery. These are implementation checks, <strong>not user-research findings, WCAG certification or measured business outcomes</strong>.</p>",
+      "<strong class=\"main-title\">Limitations and next steps</strong>",
+      "<p>A production service would require server-owned financial records, authenticated permissions and provider-approved refund policies. Native-speaker review, screen-reader testing and task-based usability sessions remain future work. No funds move in this demo.</p>"
+    ]
+  },
+  "system": {
+    "summary": "Generated foundations, reusable UI and a local transaction model keep presentation and financial rules explicit.",
+    "flowSummary": "Review a fictional record, narrow the list, inspect the breakdown and verify recovery without executing a payment.",
+    "evidenceSummary": "The same ledger in dark/light themes, an explicit blocked state, and an Arabic partial-refund breakdown.",
+    "architecture": [
+      [
+        "Token source",
+        "78 base tokens → CSS + typed references"
+      ],
+      [
+        "React components",
+        "Controls · MoneyText · StatusBadge · Table · Drawer"
+      ],
+      [
+        "Local view state",
+        "Search · filters · currency-grouped sort · selection"
+      ],
+      [
+        "Financial + locale rules",
+        "Minor-unit totals · refunds · Intl · UTC"
+      ]
+    ],
+    "flow": [
+      [
+        "Orient",
+        "Read the concept label and dataset scope."
+      ],
+      [
+        "Filter",
+        "Narrow by currency, status or reference."
+      ],
+      [
+        "Inspect",
+        "Open the row to see amounts, fees and timeline."
+      ],
+      [
+        "Reconcile",
+        "Distinguish refund credit from remaining debit."
+      ],
+      [
+        "Recover",
+        "Preview a blocked state and restore the demo."
+      ]
+    ],
+    "visuals": [
+      {
+        "type": "image",
+        "format": "contain",
+        "src": "assets/ledger-console/ledger-dark.jpg",
+        "alt": "Ledger Console dark theme with transaction filters",
+        "caption": "Dark mode: one reusable ledger layout keeps currencies, filters and states explicit."
+      },
+      {
+        "type": "image",
+        "format": "contain",
+        "src": "assets/ledger-console/ledger-light.jpg",
+        "alt": "Ledger Console light theme with transaction table",
+        "caption": "Light mode: semantic surface and text tokens change while the interaction model remains the same."
+      },
+      {
+        "type": "image",
+        "format": "contain",
+        "src": "assets/ledger-console/permission-denied.jpg",
+        "alt": "Ledger permission-denied state with no transaction data",
+        "caption": "Permission denial: transaction rows are hidden and the local demo recovery action is clearly labelled."
+      },
+      {
+        "type": "image",
+        "format": "contain",
+        "src": "assets/ledger-console/refund-arabic-light.jpg",
+        "alt": "Arabic partial-refund details in Ledger Console",
+        "caption": "Arabic/RTL: returned principal, returned fee and remaining net debit are separate. Dates explicitly show UTC."
+      }
+    ]
+  }
+}

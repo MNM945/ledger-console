@@ -14,12 +14,17 @@ One personal concept ledger page. Fictional data, no payment execution, wallet i
 - `src/styles/themes.css`: light-mode semantic overrides and shared surfaces.
 - `tokens/tokens.json`: base token source; generated CSS/TS must be rebuilt with `npm run build`.
 - `.storybook/`: component catalogue configuration.
+- `docs/DELIVERABLES.md`: all seven role-aligned deliverables and the review walkthrough.
+- `docs/COMPONENT_GUIDE.md`: variants, financial/form contracts and honest Figma reference coverage.
+- `docs/I18N_ACCESSIBILITY.md`: locale conventions and keyboard / RTL review matrix.
 
 ## Contracts
 
 Money values are display/demo data, never instructions to execute a payment. All fixture currencies use two decimals. Refund credit equals principal returned plus fee returned; net debit equals original debit minus refund credit. The demo retains original fees. All dates display UTC. Currency sorting groups codes and does not perform FX conversion.
 
 The drawer traps focus, supports Escape and restores the selected row. Statuses include text and icons. Blocked states suppress rows and filters. Recovery resets the local demo scenario and retains the user's filters.
+
+The header also provides no-data, persistent-loading and long-text scenarios. Persistent loading is held in page state without leaving a request pending; choosing another scenario exits it. The Controls Storybook example demonstrates validation only and is not an execution form. Both themes are available through the Storybook toolbar.
 
 ## Build and delivery
 

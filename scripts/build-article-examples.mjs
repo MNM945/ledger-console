@@ -1,0 +1,17 @@
+import {spawnSync} from 'node:child_process';
+import {readFile,writeFile} from 'node:fs/promises';
+import {resolve} from 'node:path';
+const root=resolve(import.meta.dirname,'..');
+await import('./build-example-docs.mjs');
+const result=spawnSync(process.execPath,[resolve(root,'node_modules/vite/bin/vite.js'),'build','--config','vite.examples.config.ts'],{cwd:root,stdio:'inherit'});
+if(result.status!==0)throw new Error('Interactive example build failed.');
+let html=await readFile(resolve(root,'dist-examples/article-examples.html'),'utf8');
+const script=html.match(/<script\b[^>]*src="([^"]+)"[^>]*><\/script>/);
+const style=html.match(/<link\b[^>]*href="([^"]+\.css)"[^>]*>/);
+if(!script||!style)throw new Error('Example build needs a script and CSS.');
+const js=await readFile(resolve(root,'dist-examples',script[1]),'utf8');
+const css=await readFile(resolve(root,'dist-examples',style[1]),'utf8');
+if(/\bimport\s*\(|\bimport\s*\{|import\.meta/.test(js)||/url\s*\(/.test(css))throw new Error('Expected a self-contained example bundle.');
+html=html.replace(script[0],'').replace(style[0],()=>`<style>${css.replace(/<\/style/gi,'<\\/style')}</style>`).replace('</body>',()=>`<script>${js.replace(/<\/script/gi,'<\\/script')}</script></body>`);
+await writeFile(resolve(root,'docs/article-examples.html'),html);
+console.log('Built standalone, reusable React examples and embedded source documentation.');

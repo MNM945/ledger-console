@@ -60,6 +60,10 @@ export const Refunded: Story = {
   args: { transaction: transactions.find((tx) => tx.status === 'refunded')! },
 };
 
+export const PartialRefund: Story = {
+  args: { transaction: transactions.find((tx) => tx.refund?.kind === 'partial')! },
+};
+
 export const RTLArabic: Story = {
   parameters: { locale: 'ar' },
   args: { transaction: transactions.find((tx) => tx.currency === 'AED')! },

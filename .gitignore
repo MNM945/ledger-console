@@ -1,5 +1,7 @@
 node_modules/
 dist/
+dist-examples/
+src/examples/docs.generated.json
 storybook-static/
 release/
 *.log

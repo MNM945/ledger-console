@@ -12,13 +12,19 @@ let build = await readFile(join(target, 'scripts/build-static.mjs'), 'utf8');
 if (!index.includes('const PROJECTS = CONTENT.projects;') || !index.includes('<div class="repo-table">')) throw new Error('Unrecognized portfolio structure; no files changed.');
 const screenshots = ['ledger-dark.jpg', 'ledger-light.jpg', 'permission-denied.jpg', 'refund-arabic-light.jpg'];
 const files = [
+  ['assets/ledger-money-short.zh.js', 'assets/ledger-money-short.zh.js'],
   ['Ledger Console.html', 'projects/ledger-console/index.html'],
+  ['docs/article-visuals.css', 'assets/ledger-console/article-visuals.css'],
+  ['docs/article-examples.html', 'projects/ledger-console/examples.html'],
+  ['storybook-static', 'projects/ledger-console/storybook'],
   ...screenshots.map(name => [`docs/validation/${name}`, `assets/ledger-console/${name}`]),
 ];
 await Promise.all(files.map(([source]) => access(join(root, source))));
 const scriptTag = '<script src="articles/ledger-console.js"></script>';
-if (!index.includes(scriptTag)) {
-  const contentScript = /<script src="content\.js[^\"]*"><\/script>/;
+const visualStyle = '<link rel="stylesheet" href="assets/ledger-console/article-visuals.css">';
+if (!index.includes('href="assets/ledger-console/article-visuals.css"')) index = index.replace('</head>', `${visualStyle}\n</head>`);
+if (!/<script\b[^>]*\bsrc="articles\/ledger-console\.js(?:\?[^"]*)?"/.test(index)) {
+  const contentScript = /<script\b[^>]*\bsrc="content\.js[^"]*"[^>]*><\/script>/;
   if (!contentScript.test(index)) throw new Error('Cannot locate the content entry point.');
   index = index.replace(contentScript, match => `${match}\n${scriptTag}`);
 }
@@ -37,7 +43,7 @@ for (const directory of ['articles', 'projects/ledger-console']) {
 const module = `// Generated from ledger-console/docs/portfolio.json. Edit that source and re-run sync.\n(() => {\n  const record = ${JSON.stringify(record, null, 2)};\n  const index = CONTENT.projects.findIndex(project => project.key === record.project.key);\n  if (index >= 0) CONTENT.projects[index] = record.project;\n  else CONTENT.projects.splice(6, 0, record.project);\n  BUILD_PROJECT_DETAILS[record.project.key] = record.system;\n})();\n`;
 for (const [source, destination] of files) {
   await mkdir(dirname(join(target, destination)), {recursive: true});
-  await cp(join(root, source), join(target, destination));
+  await cp(join(root, source), join(target, destination), {recursive: true});
 }
 await mkdir(join(target, 'articles'), {recursive: true});
 await writeFile(join(target, 'articles/ledger-console.js'), module);

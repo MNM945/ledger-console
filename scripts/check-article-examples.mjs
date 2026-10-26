@@ -1,0 +1,31 @@
+import {readFile,access} from 'node:fs/promises';
+import {resolve,relative} from 'node:path';
+import assert from 'node:assert/strict';
+const flag=process.argv.indexOf('--portfolio');
+if(flag<0||!process.argv[flag+1])throw new Error('Usage: node scripts/check-article-examples.mjs --portfolio /path/to/portfolio');
+const portfolio=resolve(process.argv[flag+1]);
+const record=JSON.parse(await readFile(new URL('../docs/portfolio.json',import.meta.url),'utf8'));
+const examples=record.project.details.filter(block=>block.includes('data-ledger-example='));
+assert.equal(examples.length,5,'Every visible delivery category needs one live window.');
+const names=[];
+for(const block of examples){
+  names.push(block.match(/data-ledger-example="([^"]+)"/)[1]);
+  const src=block.match(/<iframe[^>]+src="([^"]+)"/)[1].replaceAll('&amp;','&');
+  const target=resolve(portfolio,src.split('?')[0]);
+  assert.ok(!relative(portfolio,target).startsWith('..'),'Examples must remain inside the portfolio.');
+  await access(target);
+  assert.match(block,/loading="lazy"/,'Examples should not all load on first paint.');
+  assert.match(block,/title="[^"]+"/,'Every embedded window needs an accessible name.');
+}
+assert.deepEqual(names,['components','tokens','storybook','states','international']);
+assert.ok(!record.project.details.join('').includes('lc-section-handoff'),'The removed handoff section must not appear in the article or index.');
+const system=record.project.details.find(block=>block.includes('data-ledger-visual="system"'));
+assert.ok(system,'The visual design-system board must be present.');
+assert.match(system,/data-lc-example="system"/,'The design-system board needs its locale bridge.');
+assert.match(system,/example=system/,'The board must load the actual token and component gallery.');
+assert.ok(!system.includes('lc-system-node'),'Text-only delivery cards must not replace the visual board.');
+const index=JSON.parse(await readFile(resolve(portfolio,'projects/ledger-console/storybook/index.json'),'utf8'));
+assert.ok(index.entries['components-moneytext--docs'],'Actual Storybook controls documentation must exist.');
+const example=await readFile(resolve(portfolio,'projects/ledger-console/examples.html'),'utf8');
+assert.ok(!/<script[^>]+src=/.test(example),'The React examples should be self-contained.');
+console.log('Five labelled, lazy-loaded windows resolve; actual Storybook docs and standalone React examples are present.');

@@ -58,10 +58,12 @@ primitives with DTCG `{...}` references; the build script resolves them.
 
 ## Mode strategy
 
-- **Default mode only** in this demo. The token graph is mode-ready: dark mode
-  would be a second *mode* of the same tokens (re-pointing semantic aliases at
-  different primitives), never a parallel set of token names. Component CSS only
-  ever references semantic variables, so adding a mode touches zero components.
+- **Dark and light modes are implemented.** The generated base graph describes
+  the dark foundation. `src/styles/themes.css` overrides semantic variables for
+  light mode and adds shared surface tokens. The toggle sets `data-theme` on the
+  document root. Light overrides are currently maintained in CSS, not generated
+  from a second JSON mode; moving both modes into the token pipeline is a future
+  improvement. In Figma, use two modes of the same semantic variables.
 - **RTL is a direction dimension, not a token mode.** No `*-left`/`*-right`
   tokens exist; all spacing in component CSS uses logical properties
   (`margin-inline-start`, `inset-inline-end`, `padding-block-*`), so flipping

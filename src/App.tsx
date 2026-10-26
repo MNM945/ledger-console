@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ApiError, fetchTransactions, type DemoScenario } from './data/api';
 import type { Transaction } from './data/transactions';
-import { I18nProvider, useI18n, type Direction, type Locale } from './i18n';
+import { I18nProvider, useI18n, type Locale } from './i18n';
 import { FilterBar, type FilterState } from './components/FilterBar';
 import { TransactionTable, type SortState } from './components/TransactionTable';
 import { TransactionDrawer } from './components/TransactionDrawer';
 import { EmptyState, ErrorState, LoadingSkeleton } from './components/StateViews';
-import { DirectionToggle, LanguageSwitch } from './components/DirectionToggle';
+import { LanguageSwitch } from './components/DirectionToggle';
 import { compareMoney } from './money';
 import { ThemeToggle, type Theme } from './components/ThemeToggle';
+import { Select } from './components/Controls';
 
 type LoadState = 'loading' | 'network' | 'forbidden' | 'expired' | 'ready';
 
@@ -19,8 +20,6 @@ function Header({
   onThemeToggle,
   locale,
   onLocaleChange,
-  direction,
-  onDirectionToggle,
   scenario,
   onScenarioChange,
 }: {
@@ -28,8 +27,6 @@ function Header({
   onThemeToggle: () => void;
   locale: Locale;
   onLocaleChange: (l: Locale) => void;
-  direction: Direction;
-  onDirectionToggle: () => void;
   scenario: DemoScenario;
   onScenarioChange: (scenario: DemoScenario) => void;
 }) {
@@ -38,20 +35,21 @@ function Header({
     <header className="topbar">
       <div className="topbar__brand">
         <h1 className="topbar__title">{t.appTitle}</h1>
-        <span className="topbar__badge">{t.conceptBadge}</span>
       </div>
       <div className="topbar__controls">
         <ThemeToggle theme={theme} onToggle={onThemeToggle} />
         <LanguageSwitch locale={locale} onChange={onLocaleChange} />
-        <DirectionToggle direction={direction} onToggle={onDirectionToggle} />
         <div className="field field--inline">
           <label className="field__label" htmlFor="demo-scenario">{t.demoScenario}</label>
-          <select id="demo-scenario" className="field__input" value={scenario} onChange={e => onScenarioChange(e.target.value as DemoScenario)}>
+          <Select id="demo-scenario" value={scenario} onValueChange={value => onScenarioChange(value as DemoScenario)}>
             <option value="none">{t.scenarioReady}</option>
+            <option value="loading">{t.scenarioLoading}</option>
+            <option value="empty">{t.scenarioEmpty}</option>
+            <option value="long-text">{t.scenarioLongText}</option>
             <option value="network">{t.scenarioNetwork}</option>
             <option value="forbidden">{t.scenarioForbidden}</option>
             <option value="expired">{t.scenarioExpired}</option>
-          </select>
+          </Select>
         </div>
       </div>
     </header>
@@ -74,6 +72,8 @@ function Console({ scenario, onRecover }: { scenario: DemoScenario; onRecover: (
     setLoadState('loading');
     setData([]);
     setSelected(null);
+    // Keep loading inspectable without a pending request; changing the scenario recovers.
+    if (scenario === 'loading') return;
     fetchTransactions({ scenario })
       .then((txs) => {
         if (version !== requestVersion.current) return;
@@ -135,7 +135,7 @@ function Console({ scenario, onRecover }: { scenario: DemoScenario; onRecover: (
       </div>
       <div className="ledger-summary">
         <article><span>{t.totalRecords}</span><strong>{loadState === 'ready' ? data.length : '—'}</strong><small>{t.allRecords}</small></article>
-        <article><span>{t.currencies}</span><strong>{loadState === 'ready' ? new Set(data.map(tx => tx.currency)).size : '—'}</strong><small>GBP · USD · EUR · HKD · AED · SAR</small></article>
+        <article><span>{t.currencies}</span><strong>{loadState === 'ready' ? new Set(data.map(tx => tx.currency)).size : '—'}</strong><small>{loadState === 'ready' && data.length > 0 ? [...new Set(data.map(tx => tx.currency))].join(' · ') : t.allRecords}</small></article>
         <article><span>{t.status.processing}</span><strong>{loadState === 'ready' ? data.filter(tx => tx.status === 'processing').length : '—'}</strong><small>{t.allRecords}</small></article>
       </div>
       {loadState === 'ready' && <FilterBar value={filters} onChange={setFilters} />}
@@ -189,18 +189,12 @@ export default function App() {
     try { localStorage.setItem('ledger-console-theme', theme); } catch { /* Theme still works when storage is unavailable. */ }
   }, [theme]);
   const [locale, setLocale] = useState<Locale>('en');
-  const [direction, setDirection] = useState<Direction>('ltr');
   const [scenario, setScenario] = useState<DemoScenario>('none');
 
   useEffect(() => {
     document.documentElement.lang = locale;
-    document.documentElement.dir = direction;
-  }, [locale, direction]);
-
-  const switchLocale = (next: Locale) => {
-    setLocale(next);
-    setDirection(next === 'ar' ? 'rtl' : 'ltr');
-  };
+    document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
+  }, [locale]);
 
   return (
     <I18nProvider locale={locale}>
@@ -209,9 +203,7 @@ export default function App() {
         theme={theme}
         onThemeToggle={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}
         locale={locale}
-        onLocaleChange={switchLocale}
-        direction={direction}
-        onDirectionToggle={() => setDirection(direction === 'rtl' ? 'ltr' : 'rtl')}
+        onLocaleChange={setLocale}
         scenario={scenario}
         onScenarioChange={setScenario}
       />

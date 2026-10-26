@@ -5,6 +5,14 @@ import { MoneyText } from '../components/MoneyText';
 const meta = {
   title: 'Components/MoneyText',
   component: MoneyText,
+  tags: ['autodocs'],
+  argTypes: {
+    amount: {control:'number',description:'Display amount; currency minor-unit rounding is applied.'},
+    fee: {control:'number',description:'Optional fee in the same currency.'},
+    currency: {control:'select',options:['GBP','USD','EUR','HKD','AED','SAR','JPY','KWD']},
+    showBreakdown: {control:'boolean',description:'Show principal + fee = total when a fee is supplied.'},
+  },
+  parameters: {docs:{description:{component:'Reusable money component: explicit ISO code, integer minor-unit totals, invalid-value fallback and bidirectional isolation. Change the controls below; these are display fixtures, not payment instructions.'}}},
   decorators: [
     (Story, context) => (
       <I18nProvider locale={context.parameters.locale === 'ar' ? 'ar' : 'en'}>

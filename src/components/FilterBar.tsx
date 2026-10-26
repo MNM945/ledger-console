@@ -47,7 +47,7 @@ export function FilterBar({ value, onChange }: FilterBarProps) {
           id="filter-currency"
           className="field__input"
           value={value.currency}
-          onChange={(e) => onChange({ ...value, currency: e.target.value as Currency | 'all' })}
+          onValueChange={(currency) => onChange({ ...value, currency: currency as Currency | 'all' })}
         >
           <option value="all">{t.allCurrencies}</option>
           {ALL_CURRENCIES.map((c) => (

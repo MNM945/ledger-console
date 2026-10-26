@@ -62,11 +62,9 @@ export function TransactionTable({ transactions, sort, onSortChange, onRowOpen }
               className={numeric ? 'num' : undefined}
             >
               {key ? (
-                <button type="button" className={`th-sort ${key === 'amount' ? 'th-sort--amount' : ''}`} onClick={() => handleSort(key)} aria-label={sortHint(key, key === 'amount' ? t.amountSort : label)}>
-                  {key === 'amount' ? t.amountSort : label}
-                  <span className="th-sort__arrow" aria-hidden="true">
-                    {sort.key === key ? (sort.direction === 'asc' ? '▲' : '▼') : '↕'}
-                  </span>
+                <button type="button" className={`th-sort ${key === 'amount' ? 'th-sort--amount' : ''}`} data-sorted={sort.key === key} onClick={() => handleSort(key)} aria-label={sortHint(key, key === 'amount' ? t.amountSort : label)} title={key === 'amount' ? t.amountSort : sortHint(key, label)}>
+                  {label}
+                  <svg className="th-sort__arrow" data-direction={sort.key === key ? sort.direction : 'none'} width="12" height="16" viewBox="0 0 12 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path className="th-sort__up" d="m3 6 3-3 3 3"/><path className="th-sort__down" d="m3 10 3 3 3-3"/></svg>
                 </button>
               ) : (
                 label
@@ -91,8 +89,8 @@ export function TransactionTable({ transactions, sort, onSortChange, onRowOpen }
             }}
           >
             <td className="nowrap">{formatDate(tx.createdAt, tag)}</td>
-            <td>{tx.counterparty}</td>
-            <td className="mono"><bdi>{tx.reference}</bdi></td>
+            <td className="tx-counterparty" title={tx.counterparty}><bdi>{tx.counterparty}</bdi></td>
+            <td className="mono tx-reference" title={tx.reference}><bdi>{tx.reference}</bdi></td>
             <td className="num">
               <MoneyText amount={tx.amount} currency={tx.currency} />
             </td>

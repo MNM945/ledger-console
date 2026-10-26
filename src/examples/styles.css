@@ -1,0 +1,46 @@
+body{margin:0;background:var(--lc-color-surface-page);color:var(--lc-color-text-primary);font-family:var(--lc-font-family-base),"Microsoft YaHei",sans-serif}
+.example-header{position:sticky;top:0;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;border-bottom:1px solid var(--lc-color-border-default);background:var(--lc-color-surface-raised)}
+.example-header span{font:10px/1.4 ui-monospace,monospace;color:var(--lc-color-text-secondary)}
+.example-header h1{font-size:17px;line-height:1.5;font-weight:600;margin:3px 0 0}
+.example-header .btn{flex:none}
+.example-main{padding:18px;min-width:0}
+.example-main>label{display:grid;gap:7px;font-size:12px}
+.example-help{font-size:12px;line-height:1.8;color:var(--lc-color-text-secondary);margin:0 0 16px}
+.example-controls{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin:16px 0}
+.example-controls label,.example-form-grid label,.example-token-controls label{display:grid;gap:7px;font-size:12px;min-width:0}
+.example-component-panel{padding:16px;border:1px solid var(--lc-color-border-default);border-radius:14px;background:var(--lc-color-surface-raised)}
+.example-component-header{position:static;padding:0;border:0;background:none;margin-bottom:8px}
+.example-component-panel .example-help{margin-bottom:12px}
+.example-component-panel .example-controls{align-items:center;margin:0;gap:10px 16px}
+.example-component-panel .example-controls label{display:flex;align-items:center;gap:8px;color:var(--lc-color-text-secondary)}
+.example-component-panel .select-control{min-width:72px}
+.example-form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+.example-token-controls{display:grid;grid-template-columns:100px 1fr 1fr;gap:16px;margin:20px 0}
+.example-token-controls input{width:100%;min-height:44px;cursor:pointer}
+.example-card{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:18px;border:1px solid var(--lc-color-border-default);border-radius:14px;background:var(--lc-color-surface-raised);margin:16px 0}
+.example-card>div>span{font-size:11px;color:var(--lc-color-text-secondary)}
+.example-card strong{display:block;font-size:23px;margin-top:10px}
+.example-source{display:block;font-size:10px;line-height:1.7;color:var(--lc-color-text-secondary);margin-top:16px;overflow-wrap:anywhere}
+.example-container{width:100%;margin-inline:auto;min-width:0}
+.example-main .table-scroll{width:100%;min-width:0}
+.example-main .tx-table td{padding-block:16px}
+.example-main .filter-bar{padding:16px;border-radius:14px;gap:12px}
+.example-main .status-picks{gap:6px}
+.example-main .filter-bar .field:first-child{min-width:140px}
+.example-main .field__input{width:100%;min-width:0;max-width:100%}
+.token-preview{padding:var(--lc-space-4);border:1px solid var(--lc-color-border-default);border-radius:var(--lc-radius-lg);background:var(--lc-color-surface-raised);display:grid;gap:16px;margin:16px 0}
+.token-preview h3{font-size:18px;margin:0}
+.token-preview .btn{justify-self:start}
+.example-main pre{white-space:pre-wrap;overflow-wrap:anywhere;font:11px/1.8 ui-monospace,monospace;padding:16px;background:var(--lc-color-surface-sunken);border:1px solid var(--lc-color-border-default);border-radius:10px;color:var(--lc-color-text-primary)}
+.range-hint{font-size:10px;color:var(--lc-color-text-secondary);white-space:nowrap}
+.example-main pre.token-code{white-space:pre;overflow-x:auto;overflow-wrap:normal;max-width:100%}
+.token-code code{font:inherit;color:inherit}
+.token-code-comment{color:var(--lc-color-text-secondary)}
+.example-document{max-height:300px;overflow:auto;tab-size:2}
+.example-checklist{display:grid;gap:3px}
+.example-checklist label{display:flex;align-items:center;gap:10px;font-size:12px;min-height:44px;cursor:pointer}
+.example-state-picker{display:grid;gap:8px;font-size:12px;margin-bottom:20px}
+.example-main .state-view{min-height:210px;padding:24px 16px}
+.example-main .money--breakdown{font-size:20px}
+input[type=range]:focus-visible,input[type=color]:focus-visible,.example-document:focus-visible{outline:2px solid var(--lc-color-focus-ring);outline-offset:3px}
+@media(max-width:500px){.example-header{padding:12px}.example-header h1{font-size:15px}.example-main{padding:12px}.example-form-grid{grid-template-columns:1fr}.example-token-controls{grid-template-columns:1fr}.example-token-controls input[type=color]{max-width:120px}.example-card{padding:14px}.example-main .money--breakdown{font-size:18px}}

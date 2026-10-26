@@ -1,47 +1,69 @@
-# Ledger Console: making financial UI rules inspectable
+# Ledger Console — design-system delivery
 
-## Project and scope
+A single ledger page connects the following seven deliverables. The 42 transactions are fictional; no real account is connected and no funds move. This is an implementation study, not a client production release.
 
-Ledger Console is a single-page personal concept built with React and TypeScript. Its 42 fictional transactions cover six currencies and five transaction statuses. It is a design-system implementation study, not a client delivery or a live payment service. No account, bank or wallet is connected.
+| File / artifact | Role requirement |
+| --- | --- |
+| React + TypeScript page and components | Code delivery, reusable components and responsive layout |
+| Design tokens | Color, typography, spacing and radius foundations |
+| Component and state examples | Amounts, currencies, fees, statuses, tables, filters and forms |
+| Storybook and component documentation | Variants, usage rules and documented Figma ↔ React references |
+| Boundary-state examples | Loading, no data, errors, long text and permission restrictions |
+| Internationalization and accessibility | Multiple currencies, local formats, keyboard access and RTL |
+| English case study and README | Problem, decisions, implementation, validation and handoff |
 
-The visual treatment adapts selected components from a supplied Figma library. The transaction layout, data model, financial rules, accessibility behavior and theme support are implementation decisions for this concept. The mapping is documented; it is not automatic Figma synchronization.
+## React + TypeScript page and components
 
-## Problem
+A dense ledger needs a clear scan path and a predictable way to inspect a record. The page composes Button, Input, Select, FilterBar, MoneyText, StatusBadge, TransactionTable and TransactionDrawer instead of implementing each state separately.
 
-A ledger can look convincing while leaving its most important rules unclear. A currency symbol can be ambiguous, a refund can look like a new charge, and a rounded total can hide a different calculation. A single happy-path screen also says little about permissions, session expiry or recovery.
+Implementation: src/App.tsx owns filters, currency-grouped sorting, request states and selection. Components live in src/components/. On narrow screens, the table scrolls inside a labelled region; the details drawer supports keyboard focus and return. The TypeScript/Vite build produces a standalone Ledger Console.html for review.
 
-The goal was to make these decisions visible in both the interface and reusable component contracts.
 
-## Decisions
+## Design tokens
 
-### Keep currency and calculation explicit
+The foundation covers semantic colors, typography, spacing, radii and motion. tokens/tokens.json is the source for 78 base tokens; scripts/build-tokens.mjs emits CSS custom properties and typed TypeScript references. Generated files are rebuilt rather than edited by hand.
 
-Every amount includes its currency code. Sorting groups currencies before comparing amounts, rather than implying an exchange-rate conversion. Amounts and fees are normalized to each currency's minor units before addition. Decimal midpoint values round away from zero. All six fixture currencies use two decimal places; invalid or unsafe values render as unavailable.
+Dark and light modes share component contracts. The dark foundation is generated from JSON, while light-mode and additional surface overrides are maintained in src/styles/themes.css. Moving both modes into one generated token graph remains a handoff improvement.
 
-Full and partial refunds carry their own principal and fee-return fields. The drawer separates original debit, principal returned, fee returned, refund credit and remaining net debit. The illustrative policy retains the original fee. For example, a USD79.33 principal refund against an original USD81.38 debit leaves USD2.05 in retained fees. This is a demo rule, not a provider's financial policy.
 
-### Turn visual foundations into reusable code
+## Component and state examples
 
-A token generator emits 78 base tokens as CSS custom properties and typed references. Button, Input and Select feed the filters and state actions; MoneyText, StatusBadge, TransactionTable and TransactionDrawer define domain patterns. Semantic overrides provide a light theme while keeping the same layout and interaction contracts as dark mode. Storybook source exposes component examples for review.
+MoneyText shows ISO currency codes and local grouping. Amounts and fees are normalized to integer minor units before totals; decimal midpoint values round away from zero. Sorting groups currencies and does not imply FX conversion. StatusBadge pairs text with an icon rather than relying on color alone.
 
-### Design the blocked paths alongside the normal page
+The drawer separates original debit, principal returned, fee returned, refund credit and remaining net debit. Full and partial refunds use an explicitly illustrative policy that retains original fees. Filter examples cover search, status and currency; the Controls story adds labelled fields, required validation, inline errors and disabled controls without sending or saving data.
 
-The local request simulator exposes network failure, permission denial and session expiry. Blocked states hide transaction rows and filters, explain the situation and offer an explicit local recovery action. Retrying preserves filter selections. These controls exercise the UI; they do not authenticate a user or change real permissions.
 
-### Preserve meaning across language and input methods
+## Storybook and component documentation
 
-English and Arabic cover the supplied UI and timeline notes. Financial values use explicit codes, Latin digits and bidirectional isolation. Table dates, transaction details and timeline events use a visible UTC label. The table scrolls within its own region on narrow screens. Statuses combine words and icons, and the detail drawer contains keyboard focus, closes with Escape and restores the triggering row.
+src/stories/ makes component variants reviewable in Storybook, including monetary edge cases, statuses, active filters, long text, full/partial refunds, form validation and blocked states. The shared toolbar switches dark and light mode. Usage contracts and review paths are recorded in docs/COMPONENT_GUIDE.md and docs/DELIVERABLES.md.
 
-### Use an audit to drive specific fixes
+The Figma ↔ React relationship is documented rather than implied: Button references 22:25906 / 22:26058, Input references 22:26741, and the table-header treatment references 110:21982 in the supplied library. Ledger-specific components and interaction rules are implementation decisions. No complete library parity, Code Connect registration or automatic synchronization is claimed.
 
-The initial review found a 3.04:1 search placeholder, sub-44px targets, hidden extra monetary precision and incomplete recovery/localization states. The revised placeholder measures 6.73:1 in dark mode and 5.58:1 in light mode. Core interactive targets reach 44px; the money and refund rules are now explicit and testable.
 
-## Validation and limits
+## Boundary-state examples
 
-The production build passes TypeScript and Vite checks. Seven automated tests cover currency formatting, invalid values, grouped sorting, rounding ties, safe integer totals and full/partial refund reconciliation across the fixtures. Browser checks cover themes, filtering, drawer focus, blocked states and recovery. These are implementation results, not a measured conversion improvement or a claim of WCAG certification.
+The header exposes persistent loading, no transactions, long text, network error, permission denial and expired session. A search with no match shows a separate filtered-empty state with a clear-filters action. Loading remains inspectable until another demo state is selected.
 
-A real service would still need a server-owned money model, authenticated permissions, provider-approved refund rules, native-speaker review and task-based usability testing. No interviews, production transactions or commercial outcomes are claimed.
+Blocked states hide transaction rows and filters. Local recovery restores fixture data while preserving filter selections; it does not authenticate a user or grant access. Long names and unbroken references wrap without truncating the identifier. These patterns are also isolated under Patterns/Boundary states in Storybook.
 
-## Deliverable
 
-The repository includes reusable source components, tokens, Storybook configuration, tests, documentation and a standalone HTML build that can be opened without a local server. The single-page scope keeps the financial and interaction decisions easy to inspect.
+## Internationalization and accessibility
+
+The ledger supports English and Arabic, with automatic RTL when Arabic is selected. Currency codes remain explicit, numbers use the documented Latin-digit convention, bidirectional isolation protects identifiers, and dates are consistently labelled UTC. All six fixture currencies use two decimals; the MoneyText examples additionally exercise zero- and three-decimal formats.
+
+Keyboard support includes a skip link, visible focus, native controls, result-count announcements, Enter/Space to open a row, and a drawer with Tab containment, Escape and focus return. Core targets are at least 44px. docs/I18N_ACCESSIBILITY.md records the review matrix and remaining native-speaker and assistive-technology checks; no WCAG certification is claimed.
+
+
+## English case study and README
+
+docs/CASE_STUDY.md explains the problem, design decisions and implementation. README.md covers setup and the standalone build; docs/IMPLEMENTATION_HANDOFF.md records entry points and contracts; docs/VALIDATION.md records checks and limits. The seven deliverables are indexed in docs/DELIVERABLES.md so another designer or engineer can continue the work.
+
+TypeScript/Vite and Storybook production builds pass, alongside seven automated money/refund tests. Browser checks cover recovery, long text, form validation and a 390px Arabic/RTL/light layout with no page overflow. These are implementation checks, not user-research findings or measured business uplift. Production use still needs server-owned financial records, authenticated access and provider-approved refund rules.
+
+## Review and handoff
+
+The portfolio article includes a visual design-system board with all 78 source tokens and 13 shared components, a refund calculation explorer, and expandable boundary-state contracts. The board uses color swatches, type specimens, spacing bars, radius shapes, motion previews and layer samples; its component gallery uses the actual React components. The refund explorer reads fixtures `tx-015` (partial, EUR) and `tx-008` (full, USD) from the source dataset. It keeps the records separate and preserves the illustrative fee-retention rule. Its native radio controls and disclosures work without additional JavaScript.
+
+`npm run build:article-visuals` rebuilds the bilingual visual markup in `docs/portfolio.json`. Styling lives in `docs/article-visuals.css`; the sync scripts copy it to the portfolio's `assets/ledger-console/article-visuals.css` with the article.
+
+Start with [the deliverable index](DELIVERABLES.md), then follow the component and accessibility guides. Native-speaker review, comprehensive screen-reader testing and task-based usability research remain future work. The source-inspired Figma mapping is documented; no automatic synchronization is claimed.

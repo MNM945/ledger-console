@@ -46,7 +46,9 @@ export function ErrorState({ onRetry, kind = 'network' }: { onRetry: () => void;
   return (
     <div className="state-view state-view--error" role="alert">
       <span className="state-view__icon" aria-hidden="true">
-        ⚠
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          {kind==='forbidden'?<><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></>:kind==='expired'?<><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></>:<><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5"/><circle cx="12" cy="16" r=".8" fill="currentColor" stroke="none"/></>}
+        </svg>
       </span>
       <h2 className="state-view__title">{title}</h2>
       <p className="state-view__body">{body}</p>

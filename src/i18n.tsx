@@ -1,12 +1,15 @@
 import { createContext, useContext, type ReactNode } from 'react';
 
-export type Locale = 'en' | 'ar';
+export type Locale = 'en' | 'ar' | 'zh';
 export type Direction = 'ltr' | 'rtl';
 
 const en = {
   skipToResults: 'Skip to results',
   demoScenario: 'Demo state',
   scenarioReady: 'Normal',
+  scenarioLoading: 'Persistent loading',
+  scenarioEmpty: 'No transactions',
+  scenarioLongText: 'Long text stress test',
   scenarioNetwork: 'Network error',
   scenarioForbidden: 'Permission denied',
   scenarioExpired: 'Session expired',
@@ -41,13 +44,10 @@ const en = {
   totalRecords: 'Total transactions',
   allRecords: 'Across the full demo dataset',
   currencies: 'Currencies',
-  conceptBadge: 'Concept demo — fictional data',
   language: 'Language',
   lightMode: 'Light mode',
   darkMode: 'Dark mode',
   themeToggle: 'Toggle dark mode',
-  directionToggle: 'Switch to RTL',
-  directionToggleBack: 'Switch to LTR',
   simulateError: 'Simulate API error',
   search: 'Search',
   searchPlaceholder: 'Counterparty or reference…',
@@ -101,6 +101,9 @@ const ar: Strings = {
   skipToResults: 'الانتقال إلى النتائج',
   demoScenario: 'حالة العرض التجريبي',
   scenarioReady: 'عادي',
+  scenarioLoading: 'تحميل مستمر',
+  scenarioEmpty: 'لا توجد معاملات',
+  scenarioLongText: 'اختبار النصوص الطويلة',
   scenarioNetwork: 'خطأ في الشبكة',
   scenarioForbidden: 'الوصول مرفوض',
   scenarioExpired: 'انتهت الجلسة',
@@ -135,13 +138,10 @@ const ar: Strings = {
   allRecords: 'جميع البيانات التجريبية',
   currencies: 'العملات',
   appTitle: 'وحدة تحكم دفتر الأستاذ',
-  conceptBadge: 'عرض تجريبي — بيانات افتراضية',
   language: 'اللغة',
   lightMode: 'الوضع الفاتح',
   darkMode: 'الوضع الداكن',
   themeToggle: 'تبديل الوضع الداكن',
-  directionToggle: 'التبديل إلى RTL',
-  directionToggleBack: 'التبديل إلى LTR',
   simulateError: 'محاكاة خطأ في الواجهة',
   search: 'بحث',
   searchPlaceholder: 'الطرف المقابل أو المرجع…',
@@ -188,7 +188,27 @@ const ar: Strings = {
   announceResults: (n: number) => `يتم عرض ${n} معاملة بعد التصفية.`,
 };
 
-const dictionaries: Record<Locale, Strings> = { en, ar };
+const zh: Strings = {
+  skipToResults: '跳至结果', demoScenario: '演示状态', scenarioReady: '正常', scenarioLoading: '持续加载', scenarioEmpty: '无交易', scenarioLongText: '长文本测试', scenarioNetwork: '网络错误', scenarioForbidden: '权限不足', scenarioExpired: '会话过期',
+  forbiddenTitle: '你没有访问此账本的权限', forbiddenBody: '真实服务中需要账本查看权限，请联系账户管理员。此处不显示交易数据；恢复操作仅作用于本地演示。',
+  expiredTitle: '会话已过期', expiredBody: '真实服务需要重新登录后查看交易。此处不显示交易数据；下方操作仅恢复本地演示，不会登录任何服务。',
+  checkDemoAccess: '恢复演示访问', restoreDemoSession: '恢复演示会话',
+  precisionPolicy: '所示币种的金额与费用保留两位小数。先舍入，再计算总额；中点值按远离零的方向舍入。',
+  originalDebit: '原始扣款（金额＋费用）', fullRefund: '全额退款', partialRefund: '部分退款', refundAmount: '退回本金', feeReturned: '退回费用', refundCredit: '退款入账', netDebit: '剩余净扣款',
+  refundPolicy: '演示政策：不退还原始费用。退款入账为退回本金与退回费用之和；剩余净扣款为原始扣款减去退款入账。此规则仅供示例。',
+  timelineNotes: {
+    'Instruction received and validated': '已接收并校验指令', 'Sent to payout network': '已发送至付款网络', 'Funds confirmed by beneficiary bank': '收款银行已确认资金',
+    'Rejected: beneficiary account name mismatch': '已拒绝：收款账户名称不符', 'Full refund issued at sender request': '根据付款人要求退回全部本金', 'Partial refund issued at sender request': '根据付款人要求退回部分本金',
+  },
+  appTitle: 'Ledger Console', ledgerHeading: '交易账本', ledgerDescription: '查看各市场的交易、费用与状态。', demoData: '演示数据', totalRecords: '交易总数', allRecords: '完整演示数据集', currencies: '币种', language: '语言',
+  lightMode: '浅色主题', darkMode: '深色主题', themeToggle: '切换深色主题', simulateError: '模拟接口错误', search: '搜索', searchPlaceholder: '交易对手或参考编号…', filterStatus: '按状态筛选', filterCurrency: '币种', allCurrencies: '全部币种',
+  colDate: '日期', colCounterparty: '交易对手', colReference: '参考编号', colAmount: '金额', amountSort: '金额（按币种分组，不进行汇率换算）', moneyUnavailable: '金额不可用', colFee: '费用', colTotal: '总额', colStatus: '状态',
+  sortAscending: '升序', sortDescending: '降序', sortBy: '排序依据', loading: '正在加载交易…', errorTitle: '无法加载交易', errorBody: '账本服务不可用。这是模拟的网络错误；重试仅恢复本地演示，并保留筛选。', retry: '重试',
+  emptyNoDataTitle: '暂无交易', emptyNoDataBody: '交易出现后，将在这里显示费用与状态明细。', emptyFilteredTitle: '没有匹配的交易', emptyFilteredBody: '尝试增加状态选项或清除搜索。', clearFilters: '清除筛选',
+  openDetails: '查看交易详情：', drawerTitle: '交易详情', close: '关闭', amount: '金额', fee: '费用', total: '总额（金额＋费用）', reference: '参考编号', timeline: '时间线',
+  status: { settled: '已结算', processing: '处理中', failed: '失败', refunded: '已退款', pending: '待处理' }, results: n => `${n} 笔交易`, announceResults: n => `筛选后显示 ${n} 笔交易。`,
+};
+const dictionaries: Record<Locale, Strings> = { en, ar, zh };
 
 interface I18nValue {
   locale: Locale;
@@ -207,5 +227,5 @@ export function useI18n() {
 
 /** Intl locale tag: Arabic with Latin digits keeps financial figures scannable in both directions. */
 export function intlLocale(locale: Locale): string {
-  return locale === 'ar' ? 'ar-u-nu-latn' : 'en-GB';
+  return locale === 'ar' ? 'ar-u-nu-latn' : locale === 'zh' ? 'zh-CN' : 'en-GB';
 }

@@ -14,6 +14,8 @@ The header switches dark/light mode, English/Arabic and the local error scenario
 
 ## What is implemented
 
+See the [role-aligned delivery index](docs/DELIVERABLES.md) for all seven requested artifacts, the [component guide](docs/COMPONENT_GUIDE.md) for usage rules and Figma references, and the [internationalization / accessibility guide](docs/I18N_ACCESSIBILITY.md) for the review matrix.
+
 - Search, status/currency filters and sorting that groups currencies without implying FX conversion.
 - Explicit ISO currency codes, integer minor-unit totals, decimal tie rounding and safe-value checks.
 - Full/partial refunds with separate principal return, fee return, refund credit and remaining net debit.
@@ -21,6 +23,8 @@ The header switches dark/light mode, English/Arabic and the local error scenario
 - English/Arabic, RTL, bidirectional money isolation and visible UTC timestamps.
 - Shared dark/light component contracts, 44px core controls and a keyboard-managed details drawer.
 - A 78-token generator and Storybook component examples.
+- Inspectable persistent loading, no-data and long-text scenarios in the header.
+- Storybook form validation, disabled controls, blocked states and a shared theme toolbar.
 
 ## Run the source
 
@@ -37,6 +41,28 @@ npm run build-storybook
 `npm run build` checks TypeScript, generates tokens, creates `dist/`, and exports both `Ledger Console.html` and `docs/index.html` as standalone builds. `Start Preview.bat` serves the built app; `Start Storybook.bat` starts the component catalogue when dependencies are installed.
 
 ## Design decisions and evidence
+
+### Interactive article examples
+
+Each of the five visible delivery sections has a runnable window: responsive components,
+token overrides, the actual Storybook catalogue, boundary
+states, and locale/RTL access. The four focused
+React examples reuse production components from this repository; Storybook is the
+fifth window. English/Chinese article preferences are sent to the examples
+without resetting their interaction state. The locale example also supports Arabic.
+
+The Design tokens section also includes a visual design-system board, following
+the portfolio's TunaChain presentation: all 78 source tokens appear as swatches,
+type specimens, spacing bars, radius shapes, motion and layer samples. All 13
+shared components render directly from `src/components/`, with working form,
+filter, theme and drawer interactions. Use its section navigation or open
+`projects/ledger-console/examples.html?example=system&lang=en` in the portfolio.
+
+`npm run build` exports `docs/article-examples.html` after the main ledger build.
+`npm run build-storybook` exports the actual catalogue. Rebuild article markup with
+`npm run build:article-visuals`, then sync to the portfolio. The iframe windows load
+only near the viewport and offer a separate-tab link. Tokens, forms, recovery,
+checklists and downloads are local previews; nothing is submitted or published.
 
 - [Case study](docs/CASE_STUDY.md)
 - [Implementation handoff](docs/IMPLEMENTATION_HANDOFF.md)

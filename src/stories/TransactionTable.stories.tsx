@@ -5,6 +5,7 @@ import { transactions, type Transaction } from '../data/transactions';
 import { TransactionTable, type SortState } from '../components/TransactionTable';
 import { EmptyState, ErrorState, LoadingSkeleton } from '../components/StateViews';
 import { compareMoney } from '../money';
+import { longTextTransactions } from '../data/api';
 
 function TableDemo({ rows }: { rows: Transaction[] }) {
   const [sort, setSort] = useState<SortState>({ key: 'createdAt', direction: 'desc' });
@@ -14,7 +15,7 @@ function TableDemo({ rows }: { rows: Transaction[] }) {
     return a[sort.key].localeCompare(b[sort.key]) * direction;
   });
   return (
-    <TransactionTable transactions={sorted} sort={sort} onSortChange={setSort} onRowOpen={() => {}} />
+    <div className="table-scroll" role="region" tabIndex={0} aria-label="Transaction table example"><TransactionTable transactions={sorted} sort={sort} onSortChange={setSort} onRowOpen={() => {}} /></div>
   );
 }
 
@@ -36,6 +37,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Populated: Story = { args: { rows: transactions.slice(0, 12) } };
+export const LongText: Story = { args: { rows: longTextTransactions.slice(0, 5) } };
 
 export const Loading: Story = {
   args: { rows: [] },

@@ -4,6 +4,7 @@
   box-sizing: border-box;
 }
 
+html { scrollbar-gutter: stable; }
 
 body {
   margin: 0;
@@ -48,9 +49,9 @@ body {
 
 /* ---- top bar ------------------------------------------------------------ */
 .topbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--lc-space-3);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--lc-space-3) var(--lc-space-5);
   align-items: center;
   justify-content: space-between;
   padding: var(--lc-space-4) var(--lc-space-5);
@@ -62,14 +63,16 @@ body {
 }
 .topbar__brand {
   display: flex;
-  align-items: baseline;
-  gap: var(--lc-space-3);
-  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lc-space-4);
+  min-inline-size: 0;
 }
+.topbar__brand .theme-toggle { flex: none; inline-size: 144px; white-space: nowrap; }
 .topbar__title {
   margin: 0;
   font-size: var(--lc-font-size-xl);
   font-weight: var(--lc-font-weight-semibold);
+  white-space: nowrap;
 }
 .topbar__badge {
   font-size: var(--lc-font-size-xs);
@@ -80,11 +83,15 @@ body {
   border-radius: var(--lc-radius-pill);
 }
 .topbar__controls {
-  display: flex;
+  display: grid;
+  grid-template-columns: 180px 280px;
   align-items: center;
   gap: var(--lc-space-4);
-  flex-wrap: wrap;
+  min-inline-size: 0;
 }
+.topbar__controls .field { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+.topbar__controls .field__label { white-space: nowrap; line-height: 18px; margin: 0; }
+.topbar__controls .select-control { inline-size: 100%; min-inline-size: 0; }
 
 /* ---- buttons & fields ---------------------------------------------------- */
 .btn {
@@ -316,7 +323,7 @@ body {
   align-items: center;
   gap: var(--lc-space-2);
   text-align: center;
-  padding: var(--lc-space-8) var(--lc-space-5);
+  padding: var(--lc-space-6) var(--lc-space-5);
   background: var(--lc-color-surface-raised);
   border: 1px solid var(--lc-color-border-default);
   border-radius: var(--lc-radius-lg);
@@ -520,7 +527,7 @@ body {
 
 /* Ledger composition using the supplied Figma Button / Input / Table system. */
 
-.topbar { padding-block: 22px; background: var(--lc-color-surface-topbar); backdrop-filter: blur(16px); }
+.topbar { padding-block: 16px; background: var(--lc-color-surface-topbar); backdrop-filter: blur(16px); }
 .topbar__title { font-size: 20px; letter-spacing: -.5px; }
 .topbar__badge { background: transparent; border: 1px solid var(--lc-color-border-default); color: var(--lc-color-text-secondary); font-weight: 400; padding: 6px 10px; }
 .console__main { max-inline-size: 1380px; padding: 40px 36px; }
@@ -543,7 +550,7 @@ body {
 .field__input:focus { border-color: var(--lc-color-focus-ring); }
 .field__input option { background: var(--lc-color-surface-sunken); color: var(--lc-color-text-primary); }
 .filter-bar { background: var(--lc-color-surface-raised); padding: 24px; gap: 20px; border-radius: 24px; }
-.filter-bar .field:first-child { flex: 1; min-width: 210px; }
+.filter-bar .field:first-child { flex: 1; min-width: min(210px, 100%); }
 .field__label { font-size: 12px; margin-bottom: 6px; }
 .field--statuses { flex-basis: 100%; padding-top: 16px; border-top: 1px solid var(--lc-color-border-default); }
 .status-pick { font-size: 12px; }
@@ -559,7 +566,7 @@ body {
 .drawer { background: var(--lc-color-surface-raised); }
 @media(max-width:700px) {
   .console__main { padding: 28px 16px; }
-  .topbar { padding: 18px 16px; }
+  .topbar { padding: 16px; }
   .topbar__controls { gap: 12px; }
   .ledger-heading { align-items: flex-start; }
   .ledger-heading h2 { font-size: 28px; }
@@ -568,6 +575,22 @@ body {
   .ledger-summary strong { font-size: 28px; }
   .ledger-summary small { overflow-wrap: anywhere; }
   .filter-bar { padding: 18px; }
+}
+
+/* Header rows change only at viewport breakpoints, never with selected labels. */
+@media(max-width:960px) {
+  .topbar { grid-template-columns: minmax(0, 1fr); }
+  .topbar__brand { justify-content: space-between; }
+  .topbar__controls { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); inline-size: 100%; }
+}
+@media(max-width:700px) {
+  .topbar__controls { grid-template-columns: minmax(116px, .8fr) minmax(0, 1.2fr); }
+  .topbar__controls .field { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .topbar__controls .select-control__trigger.field__input { font-size: var(--lc-font-size-sm); gap: var(--lc-space-2); }
+}
+@media(max-width:480px) {
+  .topbar__brand .theme-toggle { inline-size: 44px; padding: 0; }
+  .topbar__brand .theme-toggle span { display: none; }
 }
 
 .field__input::placeholder { color: var(--lc-color-text-secondary); opacity: 1; }
@@ -618,7 +641,6 @@ body {
 .select-control__trigger.field__input:hover,
 .select-control__trigger.field__input[aria-expanded='true'] { background: var(--lc-color-select-hover); }
 .select-control__trigger.field__input:focus { border-color: var(--lc-color-border-default); }
-.select-control__trigger.field__input:focus-visible { outline: 2px solid var(--lc-color-focus-ring); outline-offset: 3px; }
 .select-control__trigger.field__input:disabled { opacity: .4; cursor: not-allowed; }
 .select-control__value { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .select-control__trigger img { flex: none; }
@@ -639,3 +661,30 @@ body {
 .select-control__option[data-active='true'] { background: var(--lc-color-select-hover); color: var(--lc-color-select-active); }
 .select-control__option[aria-selected='true'] { color: var(--lc-color-select-active); }
 .select-control__option[aria-disabled='true'] { opacity: .3; cursor: not-allowed; }
+
+/* Native states and pinned catalogue specimens share these exact declarations. */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--lc-space-2); }
+.btn:is(:hover,[data-preview-state='hover']):not(:disabled) { background: var(--lc-color-surface-control-hover); }
+.btn--primary:is(:hover,[data-preview-state='hover']):not(:disabled) { background: var(--lc-color-interactive-primary-hover); }
+.btn:is(:active,[data-preview-state='pressed']):not(:disabled) { background: var(--lc-color-surface-control-active); }
+.btn--primary:is(:active,[data-preview-state='pressed']):not(:disabled) { background: var(--lc-color-interactive-primary-active); }
+/* One continuous edge replaces the detached double ring without moving layout. */
+.btn:is(:focus-visible,[data-preview-state='focus']) { outline: 2px solid var(--lc-color-text-primary); outline-offset: 0; }
+.btn:disabled { background: var(--lc-color-surface-control); opacity: .4; cursor: not-allowed; }
+.btn--primary:disabled { background: var(--lc-color-interactive-primary); }
+.btn[aria-busy='true'] { opacity: 1; cursor: wait; }
+.btn__spinner { flex: none; animation: lc-spin 800ms linear infinite; }
+@keyframes lc-spin { to { transform: rotate(360deg); } }
+.field__input:is(:hover,[data-preview-state='hover']):not(:disabled):not(.select-control__trigger) { background: var(--lc-color-surface-input-hover); }
+.field__input:is(:focus-visible,[data-preview-state='focus']):not(.select-control__trigger) { border-color: var(--lc-color-focus-ring); outline: 2px solid var(--lc-color-focus-ring); outline-offset: -1px; }
+.field__input[aria-invalid='true'] { border-color: var(--lc-color-feedback-error-fg); }
+.field__input[aria-invalid='true']:is(:focus-visible,[data-preview-state='focus']) { outline-color: var(--lc-color-feedback-error-fg); }
+.field__input:disabled { opacity: .4; cursor: not-allowed; background: var(--lc-color-surface-input); }
+.select-control__trigger.field__input:is(:hover,[data-preview-state='hover'],[aria-expanded='true']):not(:disabled) { background: var(--lc-color-select-hover); }
+.select-control__trigger.field__input:is(:active,[data-preview-state='pressed']):not(:disabled) { background: var(--lc-color-select-pressed); }
+.select-control__trigger.field__input:is(:focus-visible,[data-preview-state='focus']) { outline: 2px solid var(--lc-color-select-text); outline-offset: -1px; }
+.select-control__trigger.field__input:disabled { background: var(--lc-color-select-surface); }
+.state-view--error { min-block-size: 280px; padding: 24px 16px; gap: 12px; }
+.state-view--error .state-view__title { display: flex; align-items: center; justify-content: center; min-block-size: 48px; line-height: 24px; }
+.state-view--error .state-view__body { flex: 1; font-size: var(--lc-font-size-sm); }
+.state-view--error .btn { inline-size: 180px; max-inline-size: 100%; block-size: 44px; white-space: nowrap; }

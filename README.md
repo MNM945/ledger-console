@@ -44,6 +44,10 @@ npm run build-storybook
 
 ### Interactive article examples
 
+`scripts/sync-portfolio.mjs` copies the current Storybook build and removes
+obsolete generated JavaScript/CSS chunks from the portfolio's Storybook assets.
+Rebuild Storybook before syncing changes to its components or stories.
+
 Each of the five visible delivery sections has a runnable window: responsive components,
 token overrides, the actual Storybook catalogue, boundary
 states, and locale/RTL access. The four focused
@@ -51,11 +55,19 @@ React examples reuse production components from this repository; Storybook is th
 fifth window. English/Chinese article preferences are sent to the examples
 without resetting their interaction state. The locale example also supports Arabic.
 
-The Design tokens section also includes a visual design-system board, following
-the portfolio's TunaChain presentation: all 78 source tokens appear as swatches,
-type specimens, spacing bars, radius shapes, motion and layer samples. All 13
-shared components render directly from `src/components/`, with working form,
-filter, theme and drawer interactions. Use its section navigation or open
+The Design tokens section includes a visual design-system board. Its swatches,
+values and copy actions read the ledger's active CSS variables, including theme
+surfaces, Select colors and interaction states. The unused legacy palette stays
+hidden; the displayed count reflects the current catalogue, not all 78 JSON entries.
+The board also shows typography, spacing, radii, motion and layers. All 13 shared
+components render directly from `src/components/`. The States section shows 18
+button/input specimens plus a live validation and Select example. Its pinned
+hover, pressed and focus states share CSS with native interactions, and the same
+catalogue is available in Storybook under Components/Interaction states.
+Catalogue typography uses the existing 22px page title, 18px section title,
+14px group heading and 12px label/value tokens. The duplicate display title is
+removed; typography specimens retain their actual source sizes and weights.
+Use its section navigation or open
 `projects/ledger-console/examples.html?example=system&lang=en` in the portfolio.
 
 `npm run build` exports `docs/article-examples.html` after the main ledger build.

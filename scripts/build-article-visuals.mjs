@@ -83,7 +83,7 @@ for (const [nextHeading, visual] of [
 const examples = [
   ['React + TypeScript page and components','components','01','Resize, sort and inspect','切换宽度、排序与查看详情','Change the layout width and open a transaction row.','切换布局宽度，并打开一行交易查看详情。'],
   ['Design tokens','tokens','02','Adjust the design tokens','调整设计令牌','Change color, radius and spacing; test the preview action.','调整颜色、圆角与间距，再点击预览按钮。'],
-  ['Storybook and component documentation','storybook','03','Use the actual Storybook catalogue','操作真实 Storybook 组件目录','Choose a story and change its Controls. Storybook tool labels remain English.','选择故事并修改 Controls 参数；Storybook 工具界面保留英文。'],
+  ['Storybook and component documentation','storybook','03','Explore component variants','浏览组件变体','Choose a component and adjust its properties to inspect states and themes.','选择组件并调整属性，查看状态与主题变化。'],
   ['Boundary-state examples','states','04','Trigger a state and recover','触发状态并恢复','Switch loading, empty, error, permission, session and long-text states.','切换加载、空数据、错误、权限、会话和长文本状态。'],
   ['Internationalization and accessibility','international','05','Try currencies, RTL and keyboard access','试用币种、RTL 与键盘操作','Switch locale and currency, then open and close the drawer using the keyboard.','切换语言与币种，再用键盘打开和关闭详情抽屉。'],
 ];
@@ -106,14 +106,17 @@ for(const [section,example,index,title,titleZh,instruction,instructionZh] of exa
 const requirements = [
   'Code delivery, reusable components and responsive layout',
   'Color, typography, spacing and radius foundations',
-  'Variants, usage rules and documented Figma ↔ React references',
+  'Component variants, usage guidelines and handoff documentation',
   'Loading, no data, errors, long text and permission restrictions',
   'Multiple currencies, local formats, keyboard access and RTL',
 ];
+const conciseStorybook = text('Storybook documents component variants, interaction states and edge cases in light and dark themes. Usage guidelines define expected behavior, helping teams review, reuse and maintain components consistently.','Storybook 集中展示组件变体、交互状态与边界场景，支持深浅主题切换。配套使用规范明确组件行为，便于设计评审、组件复用与后续维护。','p');
 const conciseMoneyEn = 'MoneyText keeps currency codes and local grouping. Integer minor units drive totals; refunds show principal, fees and remaining debit. Filters and form states cover search, status and validation.';
 const conciseMoneyZh = 'MoneyText 保留币种代码和本地分组格式。总额按整数最小单位计算；退款拆分本金、费用与剩余扣款。筛选和表单覆盖搜索、状态与校验。';
 const conciseTokensEn = 'Design tokens define color, type, spacing, radius and motion. tokens/tokens.json generates CSS and typed references; light-theme overrides remain in themes.css.';
 record.project.details = record.project.details.map(block => block
+  .replace(/<p>src\/stories\/ makes component variants reviewable[\s\S]*?<\/p>/, conciseStorybook)
+  .replace(/<p>The Figma ↔ React relationship is documented[\s\S]*?<\/p>/, '')
   .replace(/<p>MoneyText shows ISO currency codes and local grouping\.[\s\S]*?<\/p>/, `<p>${conciseMoneyEn}</p>`)
   .replace(/<p>The drawer separates original debit,[\s\S]*?<\/p>/, '')
   .replace(/<p>The foundation covers semantic colors,[\s\S]*?<\/p>/, `<p>${conciseTokensEn}</p>`)
@@ -131,7 +134,8 @@ const rows = examples.map(([section, example], index) => {
   const marker = record.project.details.indexOf(`<strong class="main-title">${section}</strong>`);
   record.project.details[marker] = `<strong class="main-title" id="lc-section-${example}">${section}</strong>`;
   const icon = `<svg class="lc-deliverable-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${deliverableIcons[example]}</svg>`;
-  return `<tr><td><a href="#lc-section-${example}" data-lc-index-link>${icon}<span>${escape(section)}</span></a></td><td>${escape(requirements[index])}</td></tr>`;
+  const requirement = example === 'storybook' ? text(requirements[index],'组件变体、使用规范与交接文档') : escape(requirements[index]);
+  return `<tr><td><a href="#lc-section-${example}" data-lc-index-link>${icon}<span>${escape(section)}</span></a></td><td>${requirement}</td></tr>`;
 }).join('');
 const matrix = record.project.details.findIndex(block => block.includes('class="delivery-matrix-wrap"'));
 if (matrix < 0) throw new Error('Missing deliverable index table.');

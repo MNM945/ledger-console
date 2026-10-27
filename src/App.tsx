@@ -35,9 +35,9 @@ function Header({
     <header className="topbar">
       <div className="topbar__brand">
         <h1 className="topbar__title">{t.appTitle}</h1>
+        <ThemeToggle theme={theme} onToggle={onThemeToggle} />
       </div>
       <div className="topbar__controls">
-        <ThemeToggle theme={theme} onToggle={onThemeToggle} />
         <LanguageSwitch locale={locale} onChange={onLocaleChange} />
         <div className="field field--inline">
           <label className="field__label" htmlFor="demo-scenario">{t.demoScenario}</label>

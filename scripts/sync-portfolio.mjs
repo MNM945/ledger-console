@@ -1,4 +1,4 @@
-import { access, cp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { access, cp, mkdir, readFile, readdir, realpath, unlink, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname, '..');
@@ -41,6 +41,23 @@ for (const directory of ['articles', 'projects/ledger-console']) {
   if (!line[1].includes(`"${directory}"`)) build = build.replace(line[0], `const releaseDirectories = [${line[1]}, "${directory}"];`);
 }
 const module = `// Generated from ledger-console/docs/portfolio.json. Edit that source and re-run sync.\n(() => {\n  const record = ${JSON.stringify(record, null, 2)};\n  const index = CONTENT.projects.findIndex(project => project.key === record.project.key);\n  if (index >= 0) CONTENT.projects[index] = record.project;\n  else CONTENT.projects.splice(6, 0, record.project);\n  BUILD_PROJECT_DETAILS[record.project.key] = record.system;\n})();\n`;
+// Storybook emits content-hashed chunks. Retain only the current build's chunks,
+// so repeated syncs do not accumulate obsolete generated code in the portfolio.
+const generatedAssets = join(target, 'projects/ledger-console/storybook/assets');
+let removedChunks = 0;
+try {
+  if (await realpath(generatedAssets) !== generatedAssets) throw new Error('Refusing to prune a redirected asset directory.');
+  const current = new Set(await readdir(join(root, 'storybook-static/assets')));
+  for (const entry of await readdir(generatedAssets, {withFileTypes: true})) {
+    if (!entry.isFile() || !/\.(?:js|css|map)$/.test(entry.name) || current.has(entry.name)) continue;
+    const obsolete = join(generatedAssets, entry.name);
+    if (dirname(obsolete) !== generatedAssets) throw new Error('Asset path escaped its generated directory.');
+    await unlink(obsolete);
+    removedChunks += 1;
+  }
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error;
+}
 for (const [source, destination] of files) {
   await mkdir(dirname(join(target, destination)), {recursive: true});
   await cp(join(root, source), join(target, destination), {recursive: true});
@@ -49,4 +66,4 @@ await mkdir(join(target, 'articles'), {recursive: true});
 await writeFile(join(target, 'articles/ledger-console.js'), module);
 await writeFile(join(target, 'index.html'), index);
 await writeFile(join(target, 'scripts/build-static.mjs'), build);
-console.log('Synced Ledger Console article, demo and four screenshots. Other article sources were not rewritten.');
+console.log(`Synced Ledger Console article, demo and four screenshots; removed ${removedChunks} obsolete generated chunks. Other article sources were not rewritten.`);

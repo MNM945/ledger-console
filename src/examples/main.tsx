@@ -13,6 +13,7 @@ import {longTextTransactions} from '../data/api';
 import {compareMoney} from '../money';
 import sourceDocs from './docs.generated.json';
 import {DesignSystem} from './DesignSystem';
+import {baseTokens,useThemeTokens} from './theme-tokens';
 import '../styles/tokens.css';
 import '../styles/themes.css';
 import '../styles/global.css';
@@ -47,8 +48,12 @@ function Components({theme,onThemeToggle}:{theme:'light'|'dark';onThemeToggle:()
 }
 
 function Tokens(){
-  const c=useCopy();const[color,setColor]=useState('#008b80');const[radius,setRadius]=useState(16);const[space,setSpace]=useState(20);const[count,setCount]=useState(0);
-  const style={'--lc-color-interactive-primary':color,'--lc-color-interactive-primary-hover':'var(--lc-color-interactive-primary)','--lc-radius-lg':`${radius}px`,'--lc-space-4':`${space}px`} as CSSProperties;
+  const c=useCopy();const foundation=useThemeTokens();const[overrides,setOverrides]=useState<{color?:string;radius?:number;space?:number}>({});const[count,setCount]=useState(0);
+  const sourceValue=(path:string)=>foundation.find(token=>token.path===path)?.value??baseTokens.find(token=>token.path===path)!.value;
+  const toPixels=(value:string)=>parseFloat(value)*(value.endsWith('rem')?16:1);
+  const color=overrides.color??sourceValue('color.interactive.primary').toLowerCase();const radius=overrides.radius??toPixels(sourceValue('radius.lg'));const space=overrides.space??toPixels(sourceValue('space.4'));
+  const setColor=(value:string)=>setOverrides(current=>({...current,color:value}));const setRadius=(value:number)=>setOverrides(current=>({...current,radius:value}));const setSpace=(value:number)=>setOverrides(current=>({...current,space:value}));
+  const style={'--lc-color-interactive-primary':color,...(overrides.color?{'--lc-color-interactive-primary-hover':'color-mix(in srgb,var(--lc-color-interactive-primary) 90%,#000)','--lc-color-interactive-primary-active':'color-mix(in srgb,var(--lc-color-interactive-primary) 80%,#000)'}:{}),'--lc-radius-lg':`${radius}px`,'--lc-space-4':`${space}px`} as CSSProperties;
   const codeRows = [
     {value:`--lc-color-interactive-primary: ${color};`,comment:'primary action color'},
     {value:`--lc-radius-lg: ${radius}px;`,comment:'large component corner radius'},
@@ -64,7 +69,7 @@ function Tokens(){
     </div>
     <div className="token-preview" style={style}><StatusBadge status="settled"/><h3>{c('A reusable financial card','可复用的金融卡片')}</h3><MoneyText amount={1284.5} fee={14.9} currency="GBP" showBreakdown/><Button className="btn btn--primary" style={{color:'#fff',borderRadius:'var(--lc-radius-lg)'}} onClick={()=>setCount(count+1)}>{c('Test action','测试操作')} · {count}</Button></div>
     <pre className="token-code" tabIndex={0} aria-label={c('Token CSS with comments','带注释的令牌 CSS')}><code>{codeRows.map((row,index)=><span key={index}>{row.value.padEnd(codeColumn)}<span className="token-code-comment">{`/* ${row.comment} */`}</span>{index<codeRows.length-1?'\n':''}</span>)}</code></pre>
-    <Button onClick={()=>{setColor('#008b80');setRadius(16);setSpace(20);setCount(0);}}>{c('Reset preview','重置预览')}</Button>
+    <Button onClick={()=>{setOverrides({});setCount(0);}}>{c('Reset preview','重置预览')}</Button>
   </>;
 }
 
@@ -102,6 +107,6 @@ function App(){
   useEffect(()=>{document.documentElement.lang=locale==='zh'?'zh-Hans':locale;document.documentElement.dir=locale==='ar'?'rtl':'ltr';document.documentElement.dataset.theme=theme;},[locale,theme]);
   const isComponents=example==='components'||!titles[example];
   const labels=titles[example]||titles.components;const label=labels[language==='zh'?1:0];
-  return <CopyContext.Provider value={language}><I18nProvider locale={locale}>{!isComponents&&<header className="example-header"><div><span>{example==='system'?'LEDGER / DESIGN SYSTEM':'LEDGER / LIVE EXAMPLE'}</span><h1>{label}</h1></div><Button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-pressed={theme==='dark'}>{language==='zh'?(theme==='light'?'深色':'浅色'):(theme==='light'?'Dark':'Light')}</Button></header>}<main className="example-main">{example==='system'?<DesignSystem theme={theme} onThemeToggle={()=>setTheme(theme==='light'?'dark':'light')} onLocaleChange={setLocale}/>:example==='tokens'?<Tokens/>:example==='money'?<MoneyAndFilters/>:example==='states'?<States/>:example==='international'?<International locale={locale} setLocale={setLocale}/>:example==='handoff'?<Handoff/>:<Components theme={theme} onThemeToggle={()=>setTheme(theme==='light'?'dark':'light')}/>}</main></I18nProvider></CopyContext.Provider>;
+  return <CopyContext.Provider value={language}><I18nProvider locale={locale}>{!isComponents&&<header className={`example-header${example==='system'?' example-header--system':''}`}><div><span>{example==='system'?'LEDGER / DESIGN SYSTEM':'LEDGER / LIVE EXAMPLE'}</span><h1>{label}</h1></div><Button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-pressed={theme==='dark'}>{language==='zh'?(theme==='light'?'深色':'浅色'):(theme==='light'?'Dark':'Light')}</Button></header>}<main className="example-main">{example==='system'?<DesignSystem theme={theme} onThemeToggle={()=>setTheme(theme==='light'?'dark':'light')} onLocaleChange={setLocale}/>:example==='tokens'?<Tokens/>:example==='money'?<MoneyAndFilters/>:example==='states'?<States/>:example==='international'?<International locale={locale} setLocale={setLocale}/>:example==='handoff'?<Handoff/>:<Components theme={theme} onThemeToggle={()=>setTheme(theme==='light'?'dark':'light')}/>}</main></I18nProvider></CopyContext.Provider>;
 }
 createRoot(document.getElementById('root')!).render(<App/>);

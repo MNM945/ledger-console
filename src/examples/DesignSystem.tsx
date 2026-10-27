@@ -1,5 +1,4 @@
 import {useState, useRef, type ReactNode} from 'react';
-import rawTokens from '../../tokens/tokens.json';
 import {useI18n, type Locale} from '../i18n';
 import {Button, Input, Select} from '../components/Controls';
 import {MoneyText} from '../components/MoneyText';
@@ -12,19 +11,11 @@ import {LanguageSwitch} from '../components/DirectionToggle';
 import {LoadingSkeleton, EmptyState, ErrorState} from '../components/StateViews';
 import {ALL_STATUSES, transactions, type Transaction} from '../data/transactions';
 import {compareMoney} from '../money';
+import {useThemeTokens, type Token} from './theme-tokens';
+import {InteractionStates} from './InteractionStates';
 import './design-system.css';
 
-type Token = {path: string; value: string};
-function flatten(node: object, prefix = ''): Token[] {
-  return Object.entries(node).flatMap(([key, value]) => {
-    if (key.startsWith('$') || !value || typeof value !== 'object') return [];
-    const path = prefix ? `${prefix}.${key}` : key;
-    return '$value' in value ? [{path, value: String(value.$value)}] : flatten(value, path);
-  });
-}
-export const systemTokens = flatten(rawTokens);
-const tokens = (prefix: string) => systemTokens.filter(token => token.path.startsWith(prefix));
-const variable = (path: string) => `--lc-${path.replace(/\./g, '-')}`;
+export {baseTokens as systemTokens} from './theme-tokens';
 const pixels = (value: string) => value.endsWith('rem') ? `${parseFloat(value) * 16}px` : value;
 const componentNames = ['Button','Input','Select','MoneyText','StatusBadge','FilterBar','TransactionTable','TransactionDrawer','ThemeToggle','LanguageSwitch','LoadingSkeleton','EmptyState','ErrorState'];
 export const systemComponents = componentNames;
@@ -40,6 +31,8 @@ function Component({name, children, wide = false}: {name: string; children: Reac
 export function DesignSystem({theme, onThemeToggle, onLocaleChange}: {theme: Theme; onThemeToggle: () => void; onLocaleChange: (locale: Locale) => void}) {
   const {locale, t} = useI18n();
   const c = (en: string, zh: string) => locale === 'zh' ? zh : en;
+  const foundationTokens = useThemeTokens();
+  const tokens = (prefix: string) => foundationTokens.filter(token => token.path.startsWith(prefix));
   const [feedback, setFeedback] = useState('');
   const [replay, setReplay] = useState(false);
   const [actions, setActions] = useState(0);
@@ -55,26 +48,30 @@ export function DesignSystem({theme, onThemeToggle, onLocaleChange}: {theme: The
   const rows = transactions.filter(tx => (filters.currency === 'all' || tx.currency === filters.currency) && (!filters.statuses.length || filters.statuses.includes(tx.status)) && `${tx.counterparty} ${tx.reference}`.toLowerCase().includes(filters.query.toLowerCase())).slice(0,4);
   const sorted = [...rows].sort((a,b) => (sort.key === 'amount' ? compareMoney(a,b) : a[sort.key].localeCompare(b[sort.key])) * (sort.direction === 'asc' ? 1 : -1));
   async function copyToken(token: Token) {
-    const declaration = `${variable(token.path)}: ${token.value};`;
+    const value = getComputedStyle(document.documentElement).getPropertyValue(token.variable).trim();
+    const declaration = `${token.variable}: ${value};`;
     try {await navigator.clipboard.writeText(declaration); setFeedback(c('Token copied','已复制令牌'));}
     catch {setFeedback(declaration);}
   }
   const colorGroups = [
     ['color.interactive.','Action','交互'], ['color.text.','Text','文字'], ['color.surface.','Surface','表面'],
     ['color.border.','Border','边框'], ['color.focus.','Focus','焦点'], ['color.feedback.','Feedback','反馈'],
-    ['color.status.','Status','状态'], ['color.palette.','Palette','基础色板'],
+    ['color.status.','Status','状态'],
+    ['color.select.','Select','下拉框'],
   ];
+  const visibleColorCount = colorGroups.reduce((total, [prefix]) => total + tokens(prefix).length, 0);
   return <div className="ledger-ds">
-    <header className="ledger-ds-intro"><span>LEDGER CONSOLE</span><h2>{c('Foundations & components','基础规范与组件')}</h2><div className="ledger-ds-meta"><span>{systemTokens.length} {c('tokens','个令牌')}</span><span>{componentNames.length} {c('components','个组件')}</span><span>{c('Light / Dark','浅色 / 深色')}</span></div></header>
+    <div className="ledger-ds-intro"><div className="ledger-ds-meta"><span>{foundationTokens.length || '…'} {c('tokens','个令牌')}</span><span>{componentNames.length} {c('components','个组件')}</span><span>{theme === 'light' ? c('Light theme','浅色主题') : c('Dark theme','深色主题')}</span></div></div>
     <nav className="ledger-ds-nav" aria-label={c('Design system sections','设计系统目录')}>
-      {[['colors','Color','颜色'],['type','Type','字体'],['space','Space','间距'],['radius','Radius','圆角'],['motion','Motion','动效'],['layers','Layers','层级'],['components','Components','组件']].map(([id,en,zh]) => <a key={id} href={`#ds-${id}`}>{c(en,zh)}</a>)}
+      {[['colors','Color','颜色'],['states','States','状态'],['type','Type','字体'],['space','Space','间距'],['radius','Radius','圆角'],['motion','Motion','动效'],['layers','Layers','层级'],['components','Components','组件']].map(([id,en,zh]) => <a key={id} href={`#ds-${id}`}>{c(en,zh)}</a>)}
     </nav>
     <div className="ledger-ds-content">
-      <Section id="colors" title={c('Colors','颜色')} count={tokens('color.').length}>
-        <p className="ledger-ds-note">{c('Base values · select a swatch to copy its token.','基础色值 · 点击色板复制令牌。')}</p>
-        {colorGroups.map(([prefix,en,zh]) => <div className="ledger-ds-color-group" key={prefix}><h3>{c(en,zh)}</h3><div className="ledger-ds-swatches">{tokens(prefix).map(token => <button key={token.path} type="button" className="ledger-ds-swatch" data-design-token={token.path} title={`${variable(token.path)}: ${token.value}`} aria-label={`${c('Copy','复制')} ${token.path} ${token.value}`} onClick={() => copyToken(token)}><span className="ledger-ds-checker"><i style={{background:token.value}}/></span><span className="ledger-ds-swatch-name">{token.path.slice(prefix.length)}</span><code>{token.value}</code></button>)}</div></div>)}
+      <Section id="colors" title={c('Color roles','色彩角色')} count={visibleColorCount}>
+        <p className="ledger-ds-note">{c('Current theme · select a swatch to copy its token.','当前主题 · 点击色板复制令牌。')}</p>
+        {colorGroups.map(([prefix,en,zh]) => <div className="ledger-ds-color-group" key={prefix}><h3>{c(en,zh)}</h3><div className="ledger-ds-swatches">{tokens(prefix).map(token => <button key={token.path} type="button" className="ledger-ds-swatch" data-design-token={token.path} title={`${token.variable}: ${token.value}`} aria-label={`${c('Copy','复制')} ${token.path} ${token.value}`} onClick={() => copyToken(token)}><span className="ledger-ds-checker"><i style={{background:`var(${token.variable})`}}/></span><span className="ledger-ds-swatch-name">{token.path.slice(prefix.length)}</span><code>{token.value}</code></button>)}</div></div>)}
         <p className="ledger-ds-feedback" role="status">{feedback}</p>
       </Section>
+      <Section id="states" title={c('Interaction states','交互状态')} count={18}><InteractionStates/></Section>
       <Section id="type" title={c('Typeface','字体')} count={tokens('font.').length}>
         <div className="ledger-ds-two">{tokens('font.family.').map(token => <div key={token.path} data-design-token={token.path} className="ledger-ds-font" style={{fontFamily:token.value}} title={token.value}><small>{token.path.replace('font.','')}</small><strong>{token.path.endsWith('mono')?'0123.45':'Aa Bb Cc'}</strong><span>{token.value.split(',').slice(0,2).join(',').replace(/'/g,'')}</span></div>)}</div>
         <div className="ledger-ds-type-scale">{tokens('font.size.').map(token => <div key={token.path} data-design-token={token.path}><code>{token.path.replace('font.size.','')} / {pixels(token.value)}</code><span style={{fontSize:token.value}}>{c('Aa 12','金额 12')}</span></div>)}</div>

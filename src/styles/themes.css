@@ -5,6 +5,9 @@
   --lc-color-surface-card-start: #ffffff0b;
   --lc-color-surface-card-end: #ffffff02;
   --lc-color-surface-control: #24242466;
+  --lc-color-surface-control-hover: var(--lc-color-surface-sunken);
+  --lc-color-surface-control-active: #36303f;
+  --lc-color-interactive-primary-active: #5a1bd8;
   --lc-color-surface-input: #ffffff1a;
   --lc-color-surface-input-hover: #ffffff26;
   /* Figma's contrast Select remains white in both themes. */
@@ -12,6 +15,7 @@
   --lc-color-select-text: #242424;
   --lc-color-select-hover: #e9e9e9;
   --lc-color-select-active: #6925f9;
+  --lc-color-select-pressed: #dddddd;
   --lc-radius-select-menu: 16px;
 }
 
@@ -28,6 +32,8 @@
   --lc-color-surface-card-start: #ffffff;
   --lc-color-surface-card-end: #f0edf9;
   --lc-color-surface-control: #eae6f2;
+  --lc-color-surface-control-active: #ded8e9;
+  --lc-color-interactive-primary-active: #4715b7;
   --lc-color-surface-input: #f0edf5;
   --lc-color-surface-input-hover: #e8e3f1;
   --lc-color-border-default: #ddd7e7;

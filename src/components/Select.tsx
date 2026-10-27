@@ -26,6 +26,7 @@ export function Select({id, name, className = '', disabled, value, defaultValue,
   const [localValue, setLocalValue] = useState(String(defaultValue ?? options[0]?.value ?? ''));
   const currentValue = String(value ?? localValue);
   const selected = options.findIndex(option => option.value === currentValue);
+  const selectedLabel = options[selected]?.label ?? options[0]?.label;
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const [position, setPosition] = useState<CSSProperties>({});
@@ -104,7 +105,7 @@ export function Select({id, name, className = '', disabled, value, defaultValue,
 
   return <span className="select-control">
     <button {...aria} id={triggerId} ref={trigger} type="button" role="combobox" aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? listId : undefined} aria-activedescendant={open ? `${listId}-${active}` : undefined} disabled={disabled} className={`field__input select-control__trigger ${className}`} onClick={() => open ? setOpen(false) : show()} onKeyDown={handleKey} onBlur={() => setOpen(false)}>
-      <span className="select-control__value">{options[selected]?.label ?? options[0]?.label}</span>
+      <span className="select-control__value" title={typeof selectedLabel === 'string' ? selectedLabel : undefined}>{selectedLabel}</span>
       <img src={open ? chevronUp : chevronDown} alt="" width="24" height="24" aria-hidden="true"/>
     </button>
     {name && <input type="hidden" name={name} value={currentValue} disabled={disabled}/>}

@@ -4,11 +4,15 @@
 
 Use semantic CSS variables rather than literal status colors in domain components. Generate CSS/TypeScript from `tokens/tokens.json`; never edit generated output. Shared light/dark overrides are in `src/styles/themes.css`. Inspect either mode using the Storybook toolbar. Layout uses logical properties so RTL remains independent of color mode.
 
+The design-system board reads effective `--lc-*` values from the active root styles, including additions in `themes.css`. Swatches and copied declarations follow the current theme. The legacy `color.palette.*` inventory is omitted from the visible catalogue. FilterBar and ErrorState use their shared production styles without specimen-only appearance overrides.
+
+Catalogue headings follow one token hierarchy: page title 22px/600, section title 18px/600, group heading 14px/500, label or technical value 12px/400. There is one main title. Font-size and weight specimens deliberately retain their actual token values; production component specimens retain their shared component styles.
+
 ## Component inventory
 
 | React component | Variants and usage rules | Storybook | Figma relationship |
 | --- | --- | --- | --- |
-| Button | Native button; primary, default, disabled; explicit type; at least 44px target | Components/Controls | Source-inspired Button `22:25906` / `22:26058` |
+| Button | Primary/secondary; default, hover, pressed, focus, disabled, loading; explicit type; at least 44px target; loading blocks duplicate actions and exposes aria-busy | Components/Controls; Components/Interaction states | Source-inspired Button `22:25906` / `22:26058` |
 | Input / Select | Visible labels; input validation and inline errors; disabled controls; Select supports arrows, Home/End, typeahead, Enter, Escape and Tab | Components/Controls; Components/FilterBar | Input adapts `22:26741`; Select adapts `22:26860`, `22:26875` and `22:26893–26902` |
 | MoneyText | ISO code, local grouping, tabular figures, invalid-value fallback; never add unlike currencies | Components/MoneyText | Concept-specific; no mapped Figma component |
 | StatusBadge | Five statuses, each with words and an icon; color is supplemental | Components/StatusBadge | Concept-specific |
@@ -26,7 +30,11 @@ Each displayed amount carries its currency. Amount and fee are distinct; origina
 
 ## Form contract
 
+Control focus uses one continuous 2px edge, with no separated outer ring or layout shift. Buttons use the current text color; inputs retain the semantic focus color and Select uses its own text color. Native keyboard focus and pinned specimens share these rules in both themes.
+
 The Controls story demonstrates required reference validation with a real form submit, `aria-invalid`, `aria-describedby`, inline errors and disabled controls. It sends and saves nothing. The ledger uses these controls for filtering; there is no payment or refund execution form.
+
+The board and Interaction states story render 12 button states and six input states. `data-preview-state` pins a catalogue specimen; native pseudo-classes and pinned states are grouped in the same shared CSS declarations. Preview click counters, live validation and Select changes remain local. A loading Button is disabled, shows a spinner, and has `aria-busy="true"`.
 
 ## Handoff rules
 

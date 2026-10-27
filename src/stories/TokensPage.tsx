@@ -1,37 +1,6 @@
 import type { ReactNode } from 'react';
-import rawTokens from '../../tokens/tokens.json';
-
-type TokenNode = { [key: string]: TokenNode | { $value: string } | string };
-
-interface FlatToken {
-  path: string;
-  value: string;
-}
-
-function flatten(node: TokenNode, path: string[] = []): FlatToken[] {
-  const out: FlatToken[] = [];
-  for (const [key, val] of Object.entries(node)) {
-    if (key.startsWith('$')) continue;
-    if (val && typeof val === 'object' && '$value' in val) {
-      out.push({ path: [...path, key].join('.'), value: String((val as { $value: string }).$value) });
-    } else if (val && typeof val === 'object') {
-      out.push(...flatten(val as TokenNode, [...path, key]));
-    }
-  }
-  return out;
-}
-
-const flat = flatten(rawTokens as unknown as TokenNode);
-const byPath = new Map(flat.map((t) => [t.path, t.value]));
-
-function resolve(value: string): string {
-  const m = value.match(/^\{(.+)\}$/);
-  if (!m) return value;
-  const next = byPath.get(m[1]);
-  return next === undefined ? value : resolve(next);
-}
-
-const cssVar = (path: string) => `--lc-${path.replace(/\./g, '-')}`;
+import {Button} from '../components/Controls';
+import {useThemeTokens, type Token} from '../examples/theme-tokens';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -42,19 +11,17 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function ColorSwatches({ prefix }: { prefix: string }) {
-  const rows = flat.filter((t) => t.path.startsWith(prefix));
+function ColorSwatches({ rows }: { rows: Token[] }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(128px, 1fr))', gap: '0.75rem' }}>
       {rows.map((t) => {
-        const resolved = resolve(t.value);
         return (
-          <div key={t.path} style={{ border: '1px solid var(--lc-color-border-default)', borderRadius: '0.5rem', overflow: 'hidden' }}>
-            <div style={{ height: '3rem', background: resolved }} />
-            <div style={{ padding: '0.5rem', fontSize: '0.75rem', fontFamily: 'var(--lc-font-family-mono)' }}>
+          <div key={t.path} data-story-token={t.path} style={{ border: '1px solid var(--lc-color-border-default)', borderRadius: '0.5rem', overflow: 'hidden' }}>
+            <div style={{ height: '2rem', background: `var(${t.variable})` }} />
+            <div style={{ padding: '0.5rem', fontSize: '0.75rem', overflowWrap:'anywhere', fontFamily: 'var(--lc-font-family-mono)' }}>
               <div>{t.path}</div>
-              <div style={{ color: 'var(--lc-color-text-secondary)' }}>{resolved}</div>
-              <div style={{ color: 'var(--lc-color-text-secondary)' }}>var({cssVar(t.path)})</div>
+              <div data-story-token-value style={{ color: 'var(--lc-color-text-secondary)' }}>{t.value}</div>
+              <div style={{ color: 'var(--lc-color-text-secondary)' }}>var({t.variable})</div>
             </div>
           </div>
         );
@@ -63,8 +30,7 @@ function ColorSwatches({ prefix }: { prefix: string }) {
   );
 }
 
-function TokenTable({ prefix }: { prefix: string }) {
-  const rows = flat.filter((t) => t.path.startsWith(prefix));
+function TokenTable({ rows }: { rows: Token[] }) {
   return (
     <table style={{ borderCollapse: 'collapse', fontSize: '0.875rem', fontFamily: 'var(--lc-font-family-base)' }}>
       <thead>
@@ -83,10 +49,10 @@ function TokenTable({ prefix }: { prefix: string }) {
               {t.path}
             </td>
             <td style={{ padding: '0.4rem 0.75rem', borderBottom: '1px solid var(--lc-color-border-default)' }}>
-              {resolve(t.value)}
+              {t.value}
             </td>
             <td style={{ padding: '0.4rem 0.75rem', borderBottom: '1px solid var(--lc-color-border-default)', fontFamily: 'var(--lc-font-family-mono)' }}>
-              var({cssVar(t.path)})
+              var({t.variable})
             </td>
           </tr>
         ))}
@@ -96,37 +62,35 @@ function TokenTable({ prefix }: { prefix: string }) {
 }
 
 export function TokensPage() {
+  const flat = useThemeTokens();
+  const rows = (prefix: string) => flat.filter(token => token.path.startsWith(prefix));
+  const theme = typeof document !== 'undefined' && document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
   return (
-    <div style={{ fontFamily: 'var(--lc-font-family-base)', color: 'var(--lc-color-text-primary)' }}>
+    <div style={{ fontFamily: 'var(--lc-font-family-base)', color: 'var(--lc-color-text-primary)', background:'var(--lc-color-surface-page)', padding:16, borderRadius:'var(--lc-radius-lg)' }}>
       <p>
-        Rendered directly from <code>tokens/tokens.json</code> — the same source that generates{' '}
-        <code>src/styles/tokens.css</code> and <code>src/tokens.ts</code> via <code>scripts/build-tokens.mjs</code>.
-        See <code>docs/figma-variables-mapping.md</code> for the Figma Variables naming contract.
+        Effective theme values from the same CSS variables used by the ledger. The legacy primitive palette is hidden.
       </p>
-      <Section title="Status colors (semantic)">
-        <ColorSwatches prefix="color.status." />
-      </Section>
-      <Section title="Palette (primitive)">
-        <ColorSwatches prefix="color.palette." />
-      </Section>
+      <Button onClick={() => {document.documentElement.dataset.theme = theme === 'light' ? 'dark' : 'light';}} aria-label="Switch token theme" aria-pressed={theme === 'dark'}>{theme === 'light' ? 'Dark theme' : 'Light theme'}</Button>
+      {(['interactive','text','surface','border','focus','feedback','status','select'] as const).map(group => <Section key={group} title={`${group[0].toUpperCase()}${group.slice(1)} colors`}><ColorSwatches rows={rows(`color.${group}.`)}/></Section>)}
+      <Section title="Font families"><TokenTable rows={rows('font.family.')}/></Section>
       <Section title="Type scale">
-        <TokenTable prefix="font.size." />
+        <TokenTable rows={rows('font.size.')} />
       </Section>
       <Section title="Font weight">
-        <TokenTable prefix="font.weight." />
+        <TokenTable rows={rows('font.weight.')} />
       </Section>
       <Section title="Spacing">
-        <TokenTable prefix="space." />
+        <TokenTable rows={rows('space.')} />
       </Section>
       <Section title="Radius">
-        <TokenTable prefix="radius." />
+        <TokenTable rows={rows('radius.')} />
       </Section>
       <Section title="Motion">
-        <TokenTable prefix="duration." />
-        <TokenTable prefix="easing." />
+        <TokenTable rows={rows('duration.')} />
+        <TokenTable rows={rows('easing.')} />
       </Section>
       <Section title="Z-index">
-        <TokenTable prefix="z-index." />
+        <TokenTable rows={rows('z-index.')} />
       </Section>
     </div>
   );

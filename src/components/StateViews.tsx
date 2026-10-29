@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from './Controls';
 import { useI18n } from '../i18n';
 
@@ -40,6 +41,8 @@ export function EmptyState({ variant, onClearFilters }: { variant: 'no-data' | '
 
 export function ErrorState({ onRetry, kind = 'network' }: { onRetry: () => void; kind?: 'network' | 'forbidden' | 'expired' }) {
   const { t } = useI18n();
+  const [contactNotice, setContactNotice] = useState(false);
+  const [signInNotice, setSignInNotice] = useState(false);
   const title = kind === 'forbidden' ? t.forbiddenTitle : kind === 'expired' ? t.expiredTitle : t.errorTitle;
   const body = kind === 'forbidden' ? t.forbiddenBody : kind === 'expired' ? t.expiredBody : t.errorBody;
   const action = kind === 'forbidden' ? t.checkDemoAccess : kind === 'expired' ? t.restoreDemoSession : t.retry;
@@ -52,9 +55,11 @@ export function ErrorState({ onRetry, kind = 'network' }: { onRetry: () => void;
       </span>
       <h2 className="state-view__title">{title}</h2>
       <p className="state-view__body">{body}</p>
-      <Button type="button" className="btn btn--primary" onClick={onRetry}>
+      <Button type="button" className="btn btn--primary" onClick={kind === 'forbidden' ? () => setContactNotice(true) : kind === 'expired' ? () => setSignInNotice(true) : onRetry}>
         {action}
       </Button>
+      {kind === 'forbidden' && contactNotice && <p className="state-view__body" role="status">{t.contactAdminNotice}</p>}
+      {kind === 'expired' && signInNotice && <p className="state-view__body" role="status">{t.signInNotice}</p>}
     </div>
   );
 }

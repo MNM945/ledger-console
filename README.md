@@ -49,11 +49,12 @@ obsolete generated JavaScript/CSS chunks from the portfolio's Storybook assets.
 Rebuild Storybook before syncing changes to its components or stories.
 
 Each of the five visible delivery sections has a runnable window: responsive components,
-token overrides, the actual Storybook catalogue, boundary
+token overrides, a compact interactive Storybook MoneyText story, boundary
 states, and locale/RTL access. The four focused
 React examples reuse production components from this repository; Storybook is the
 fifth window. English/Chinese article preferences are sent to the examples
 without resetting their interaction state. The locale example also supports Arabic.
+The Storybook window keeps the full catalogue one click away for deeper review.
 
 The Design tokens section includes a visual design-system board. Its swatches,
 values and copy actions read the ledger's active CSS variables, including theme

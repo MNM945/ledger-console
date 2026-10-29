@@ -80,12 +80,35 @@ function MoneyAndFilters(){
   return <><p className="example-help">{c('Edit amount and fee to preview integer-unit totals. Then search, filter or sort the fixture records. No payment is created.','编辑金额与费用，预览按整数最小单位计算的总额；再搜索、筛选或排序记录。不创建支付。')}</p><div className="example-form-grid"><label htmlFor="sample-amount">{c('Amount','金额')}<Input id="sample-amount" inputMode="decimal" value={amount} onChange={e=>setAmount(e.target.value)} aria-invalid={!valid(amount)} aria-describedby={!valid(amount)?'sample-money-error':undefined}/></label><label htmlFor="sample-fee">{c('Fee','费用')}<Input id="sample-fee" inputMode="decimal" value={fee} onChange={e=>setFee(e.target.value)} aria-invalid={!valid(fee)} aria-describedby={!valid(fee)?'sample-money-error':undefined}/></label><label>{c('Currency','币种')}<Select aria-label={c('Currency','币种')} value={currency} onValueChange={setCurrency}>{ALL_CURRENCIES.map(code=><option key={code}>{code}</option>)}</Select></label></div>{(!valid(amount)||!valid(fee))&&<p id="sample-money-error" role="alert" className="field__error">{c('Enter 0–1,000,000 with up to two decimal places.','请输入 0–1,000,000 范围内、最多两位小数的数值。')}</p>}<div className="example-card"><span>{c('Total (principal + fee)','总额（本金＋费用）')}</span><MoneyText amount={valid(amount)?Number(amount):NaN} fee={valid(fee)?Number(fee):NaN} currency={currency} showBreakdown/></div><FilterBar value={filters} onChange={setFilters}/><p role="status">{c('Matched records','匹配记录')}：{rows.length}</p>{rows.length?<Rows rows={rows.slice(0,5)}/>:<EmptyState variant="no-results" onClearFilters={()=>setFilters(defaults)}/>}</>;
 }
 
+type BoundaryKind = 'loading' | 'no-data' | 'no-results' | 'network' | 'forbidden' | 'expired' | 'long-text';
+const boundaryCases: [BoundaryKind, string, string, string, string][] = [
+  ['loading','Loading','加载中','Opening the ledger while records load.','打开账本时，交易记录正在加载。'],
+  ['no-data','No transactions','无交易','A new merchant has no transactions yet.','新商户尚未产生交易。'],
+  ['no-results','No filter matches','筛选无匹配','A reference search finds no matching records.','搜索的参考编号没有匹配记录。'],
+  ['network','Network error','网络错误','A connection problem prevents records from loading.','网络连接中断，无法加载记录。'],
+  ['forbidden','Permission denied','权限不足','An employee does not have access to the ledger.','员工没有查看账本的权限。'],
+  ['expired','Session expired','会话过期','The sign-in session has expired.','登录会话已过期。'],
+  ['long-text','Long text','长文本','Long names and references remain readable in a scrollable table.','长名称和参考编号保持可读，表格可横向滚动。'],
+];
+function BoundaryCard({entry}:{entry:typeof boundaryCases[number]}){
+  const [kind,en,zh,description,descriptionZh]=entry;
+  const [recovered,setRecovered]=useState(false);
+  const c=useCopy();
+  return <section className="boundary-card" aria-label={c(en,zh)}>
+    <div className="boundary-card__copy"><h2>{c(en,zh)}</h2><p>{c(description,descriptionZh)}</p></div>
+    <div className="boundary-card__preview">
+      {recovered?<><p className="boundary-card__restored" role="status">{c('Records restored in this example.','示例中的交易记录已恢复。')}</p><Rows rows={transactions.slice(0,1)}/><Button onClick={()=>setRecovered(false)}>{c('Reset example','重置示例')}</Button></>:
+       kind==='loading'?<><LoadingSkeleton rows={2}/><Button onClick={()=>setRecovered(true)}>{c('Show records','显示记录')}</Button></>:
+       kind==='no-data'?<EmptyState variant="no-data"/>:
+       kind==='no-results'?<EmptyState variant="no-results" onClearFilters={()=>setRecovered(true)}/>:
+       kind==='long-text'?<Rows rows={longTextTransactions.slice(0,1)}/>:
+       <ErrorState kind={kind} onRetry={()=>setRecovered(true)}/>}
+    </div>
+  </section>;
+}
 function States(){
-  const c=useCopy();const[state,setState]=useState('ready');const[filters,setFilters]=useState<FilterState>(defaults);
-  const states=[['ready','Normal','正常'],['loading','Loading','加载'],['no-data','No transactions','无交易'],['no-results','No filter matches','筛选无匹配'],['network','Network error','网络错误'],['forbidden','Permission denied','权限不足'],['expired','Session expired','会话过期'],['long-text','Long text','长文本']];
-  return <><p className="example-help">{c('Choose a state, then use its recovery action. Loading is held until you choose another state; access/session actions only restore this local example.','选择状态并试用恢复操作。加载保持到你切换其他状态；权限和会话操作只恢复本地示例。')}</p><label className="example-state-picker">{c('State','状态')}<Select aria-label={c('State','状态')} value={state} onValueChange={setState}>{states.map(([value,en,zh])=><option key={value} value={value}>{c(en,zh)}</option>)}</Select></label>
-  {state==='loading'?<LoadingSkeleton rows={4}/>:state==='no-data'?<EmptyState variant="no-data"/>:state==='no-results'?<EmptyState variant="no-results" onClearFilters={()=>{setFilters(defaults);setState('ready');}}/>:state==='network'||state==='forbidden'||state==='expired'?<ErrorState kind={state} onRetry={()=>setState('ready')}/>:<><FilterBar value={filters} onChange={setFilters}/><Rows onClear={()=>setFilters(defaults)} rows={(state==='long-text'?longTextTransactions:transactions).filter(tx=>(!filters.statuses.length||filters.statuses.includes(tx.status))&&(filters.currency==='all'||tx.currency===filters.currency)&&`${tx.counterparty} ${tx.reference}`.toLowerCase().includes(filters.query.toLowerCase())).slice(0,3)}/></>}
-  <p className="example-help" role="status">{c('Current local state','当前本地状态')}：{c(states.find(s=>s[0]===state)![1],states.find(s=>s[0]===state)![2])}</p></>;
+  const c=useCopy();
+  return <><p className="example-help">{c('Explore each state and try its recovery action.','查看每种状态，并试用恢复操作。')}</p><div className="boundary-grid">{boundaryCases.map(entry=><BoundaryCard key={entry[0]} entry={entry}/>)}</div></>;
 }
 
 function International({locale,setLocale}:{locale:Locale;setLocale:(locale:Locale)=>void}){
@@ -103,8 +126,16 @@ function Handoff(){
 function App(){
   const params=new URLSearchParams(location.search);const example=params.get('example')||'components';const initial=params.get('lang')==='zh'?'zh':'en';
   const[language,setLanguage]=useState<ArticleLanguage>(initial);const[locale,setLocale]=useState<Locale>(initial);const[theme,setTheme]=useState<'light'|'dark'>('light');
-  useEffect(()=>{function receive(event:MessageEvent){if(event.source!==parent||event.origin!==location.origin||event.data?.type!=='ledger-example-language'||!['en','zh'].includes(event.data.locale))return;setLanguage(event.data.locale);setLocale(event.data.locale);}addEventListener('message',receive);if(parent!==window)parent.postMessage({type:'ledger-example-ready'},location.origin);return()=>removeEventListener('message',receive);},[]);
+  useEffect(()=>{function receive(event:MessageEvent){if(event.source!==parent||(event.origin!==location.origin&&!(location.protocol==='file:'&&event.origin==='null'))||event.data?.type!=='ledger-example-language'||!['en','zh'].includes(event.data.locale))return;setLanguage(event.data.locale);setLocale(event.data.locale);}addEventListener('message',receive);if(parent!==window)parent.postMessage({type:'ledger-example-ready'},location.protocol==='file:'?'*':location.origin);return()=>removeEventListener('message',receive);},[]);
   useEffect(()=>{document.documentElement.lang=locale==='zh'?'zh-Hans':locale;document.documentElement.dir=locale==='ar'?'rtl':'ltr';document.documentElement.dataset.theme=theme;},[locale,theme]);
+  useEffect(()=>{
+    if(example!=='states'||parent===window)return;
+    const main=document.querySelector('main');
+    if(!main)return;
+    const sendHeight=()=>{const bottom=main.getBoundingClientRect().bottom+window.scrollY;parent.postMessage({type:'ledger-example-resize',height:Math.ceil(bottom)},location.protocol==='file:'?'*':location.origin);};
+    const observer=new ResizeObserver(sendHeight);observer.observe(main);window.addEventListener('resize',sendHeight);sendHeight();
+    return()=>{observer.disconnect();window.removeEventListener('resize',sendHeight);};
+  },[example]);
   const isComponents=example==='components'||!titles[example];
   const labels=titles[example]||titles.components;const label=labels[language==='zh'?1:0];
   return <CopyContext.Provider value={language}><I18nProvider locale={locale}>{!isComponents&&<header className={`example-header${example==='system'?' example-header--system':''}`}><div><span>{example==='system'?'LEDGER / DESIGN SYSTEM':'LEDGER / LIVE EXAMPLE'}</span><h1>{label}</h1></div><Button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-pressed={theme==='dark'}>{language==='zh'?(theme==='light'?'深色':'浅色'):(theme==='light'?'Dark':'Light')}</Button></header>}<main className="example-main">{example==='system'?<DesignSystem theme={theme} onThemeToggle={()=>setTheme(theme==='light'?'dark':'light')} onLocaleChange={setLocale}/>:example==='tokens'?<Tokens/>:example==='money'?<MoneyAndFilters/>:example==='states'?<States/>:example==='international'?<International locale={locale} setLocale={setLocale}/>:example==='handoff'?<Handoff/>:<Components theme={theme} onThemeToggle={()=>setTheme(theme==='light'?'dark':'light')}/>}</main></I18nProvider></CopyContext.Provider>;

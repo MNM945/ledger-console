@@ -42,23 +42,9 @@ const money = `<figure class="lc-article-viz" data-ledger-visual="money" aria-la
 ${text('Two separate fictional records. Currencies are never added together or converted. Values follow the source fixtures and integer minor-unit calculation.','这里是两笔独立的虚构记录，不跨币种相加或换算。数值取自源数据，并按整数最小单位计算。','figcaption','class="lc-viz-caption"')}
 </figure>`;
 
-const states = [
-  ['Loading','加载中','Rows stay hidden while the loading state is shown.','加载状态显示期间隐藏交易行。','Choose Normal to leave the persistent loading example.','选择正常状态，退出持续加载示例。'],
-  ['No transactions','无交易','No records exist in the selected demo dataset.','所选演示数据集中没有记录。','Explain when records will appear; no unnecessary reset action.','说明记录何时出现，不添加多余的重置操作。'],
-  ['No filter matches','筛选无匹配','The dataset exists, but the current filters match nothing.','数据存在，但当前筛选未匹配任何记录。','Clear filters to return to the existing records.','清除筛选，返回已有记录。'],
-  ['Network error','网络错误','The simulated request fails; no transaction rows are shown.','模拟请求失败，不显示交易行。','Retry restores the local demo and preserves filters.','重试恢复本地演示，并保留筛选。'],
-  ['Permission / session','权限／会话','Permission denial and expired session have separate explanations.','权限不足与会话过期分别提供对应说明。','Restore demo access or session locally; no real authentication.','在本地恢复演示访问或会话，不进行真实身份验证。'],
-  ['Long text','长文本','All 42 records remain; one name and reference stress the layout.','保留全部 42 条记录，用一个长名称与参考编号测试布局。','Wrap the full identifier; keep the table scrollable.','完整标识符换行，表格保持可滚动。'],
-];
-const boundaries = `<figure class="lc-article-viz" data-ledger-visual="states" aria-labelledby="lc-viz-states">
-${heading('lc-viz-states','Every state has a visible next step','每种状态都有清楚的后续路径','03')}
-<div class="lc-state-route">${text('Local request','本地请求','span')}${arrow}${text('Loading','加载中','span')}${arrow}${text('Records or an explained state','记录或有解释的状态','span')}</div>
-${text('Open a state to inspect its presentation and recovery rule. These are the demo’s UI contracts, not live service controls.','展开状态，查看呈现方式与恢复规则。这些是演示的界面契约，不是真实服务操作。','p','class="lc-viz-caption"')}
-<div class="lc-state-grid">${states.map(([name,zh,body,bodyZh,recovery,recoveryZh])=>`<details class="lc-state-card" open><summary>${text(name,zh)}<span class="lc-state-chevron" aria-hidden="true">＋</span></summary><div>${text(body,bodyZh,'p')}<div class="lc-state-recovery">${text('Next step','后续路径','strong')}${text(recovery,recoveryZh,'p')}</div></div></details>`).join('')}</div>
-</figure>`;
-
 record.project.details = record.project.details.filter(block => !block.includes('data-ledger-visual='));
 record.project.details = record.project.details.filter(block => !block.includes('data-ledger-example='));
+record.project.details = record.project.details.filter(block => !block.includes('data-ledger-money-notes'));
 // Normalize generated anchor attributes before locating source section markers.
 record.project.details = record.project.details.map(block => block.replace(/(<strong class="main-title") id="lc-section-[^"]+"/g, '$1'));
 const handoffStart = record.project.details.indexOf('<strong class="main-title">English case study and README</strong>');
@@ -74,24 +60,43 @@ if (componentStatesStart >= 0) {
 for (const [nextHeading, visual] of [
   ['Storybook and component documentation',system],
   ['Storybook and component documentation',await buildThemeDiagram()],
-  ['Internationalization and accessibility',boundaries],
 ]) {
   const index = record.project.details.indexOf(`<strong class="main-title">${nextHeading}</strong>`);
   if (index < 0) throw new Error(`Cannot locate article section: ${nextHeading}`);
   record.project.details.splice(index,0,visual);
 }
+// Keep the introduction aligned with the paired, interactive examples below.
+record.project.details = record.project.details.map(block => {
+  if (block.includes('The header exposes persistent loading')) return text('Each example pairs a real interface state with a practical scenario. Try the available actions to see how a user can recover.','每个示例将真实界面状态与具体场景放在一起，可试用操作查看恢复路径。','p');
+  if (block.includes('Blocked states hide transaction rows and filters.')) return text('The examples cover loading, empty results, connection errors, access, expired sessions and long text. Recovery actions operate on local example data.','示例涵盖加载、空数据、网络错误、权限、会话过期和长文本；恢复操作使用本地示例数据。','p');
+  return block;
+});
+const moneyNotes = `<section class="lc-money-notes" data-ledger-money-notes aria-labelledby="lc-money-notes-title">
+  ${text('Four details behind MoneyText','金额展示的四个细节','h3','id="lc-money-notes-title"')}
+  <dl>
+    <div>${text('ISO currency codes','ISO 币种代码','dt')}<dd>${text('Codes distinguish currencies that share a symbol.','用标准代码区分使用相同符号的币种。')}<code>USD 100.00 ≠ HKD 100.00</code></dd></div>
+    <div>${text('Local formats','本地格式','dt')}<dd>${text('Separators and decimal places follow the locale and currency.','分隔符与小数位随地区和币种调整。')}<code>GBP 1,234.50 · JPY 1,234 · KWD 12.345</code></dd></div>
+    <div>${text('Invalid amounts','无效金额','dt')}<dd>${text('Invalid input shows a fallback instead of zero.','无效输入显示占位提示，避免误认为零。')}<code>${text('Empty input → Amount unavailable','清空输入 → 金额不可用')}</code></dd></div>
+    <div>${text('Bidirectional isolation','双向文本隔离','dt')}<dd>${text('Currency codes and numbers stay isolated inside RTL text.','在从右向左的文字中隔离币种代码与数字。')}<code><span dir="rtl" lang="ar">المبلغ <bdi dir="ltr">AED 2,322.95</bdi></span></code></dd></div>
+  </dl>
+</section>`;
 const examples = [
   ['React + TypeScript page and components','components','01','Resize, sort and inspect','切换宽度、排序与查看详情','Change the layout width and open a transaction row.','切换布局宽度，并打开一行交易查看详情。'],
   ['Design tokens','tokens','02','Adjust the design tokens','调整设计令牌','Change color, radius and spacing; test the preview action.','调整颜色、圆角与间距，再点击预览按钮。'],
   ['Storybook and component documentation','storybook','03','Explore component variants','浏览组件变体','Choose a component and adjust its properties to inspect states and themes.','选择组件并调整属性，查看状态与主题变化。'],
-  ['Boundary-state examples','states','04','Trigger a state and recover','触发状态并恢复','Switch loading, empty, error, permission, session and long-text states.','切换加载、空数据、错误、权限、会话和长文本状态。'],
+  ['Boundary-state examples','states','04','Explore states and recovery','查看状态与恢复','See each state alongside its example and try the recovery actions.','对照说明查看每种状态，并试用恢复操作。'],
   ['Internationalization and accessibility','international','05','Try currencies, RTL and keyboard access','试用币种、RTL 与键盘操作','Switch locale and currency, then open and close the drawer using the keyboard.','切换语言与币种，再用键盘打开和关闭详情抽屉。'],
 ];
 for(const [section,example,index,title,titleZh,instruction,instructionZh] of examples){
-  const src=example==='storybook'?'projects/ledger-console/storybook/index.html?path=/docs/components-moneytext--docs':`projects/ledger-console/examples.html?example=${example}&lang=en`;
+  const src=example==='storybook'?'projects/ledger-console/storybook/iframe.html?id=components-moneytext--interactive&viewMode=story&globals=theme:light':`projects/ledger-console/examples.html?example=${example}&lang=en`;
+  const storybookUrl='projects/ledger-console/storybook/index.html?path=/docs/components-moneytext--docs';
   const label=`Ledger Console interactive example ${index}: ${title}`;
   const labelZh=`Ledger Console 交互示例 ${index}：${titleZh}`;
-  const window=`<figure class="lc-example-window" data-ledger-example="${example}" aria-labelledby="lc-example-heading-${example}"><div class="lc-example-caption"><span class="lc-example-number">LIVE ${index}</span>${text(title,titleZh,'h3',`id="lc-example-heading-${example}"`)}${text(instruction,instructionZh,'p')}</div><iframe src="${escape(src)}" title="${escape(label)}" data-lc-title-en="${escape(label)}" data-lc-title-zh="${escape(labelZh)}" data-lc-example="${example}" loading="lazy" allow="clipboard-write"></iframe></figure>`;
+  const caption = example === 'storybook'
+    ? `<div class="lc-example-caption lc-example-caption--compact"><span class="lc-example-number">LIVE ${index}</span><a href="${escape(storybookUrl)}" target="_blank" rel="noopener noreferrer">${text('Open Storybook ↗','打开 Storybook ↗')}</a></div>`
+    : `<div class="lc-example-caption"><span class="lc-example-number">LIVE ${index}</span>${text(title,titleZh,'h3',`id="lc-example-heading-${example}"`)}${text(instruction,instructionZh,'p')}</div>`;
+  const heading = example === 'storybook' ? 'lc-section-storybook' : `lc-example-heading-${example}`;
+  const window=`<figure class="lc-example-window" data-ledger-example="${example}" aria-labelledby="${heading}">${caption}<iframe src="${escape(src)}" title="${escape(label)}" data-lc-title-en="${escape(label)}" data-lc-title-zh="${escape(labelZh)}" data-lc-example="${example}" loading="lazy" allow="clipboard-write"></iframe></figure>`;
   if (example === 'components') {
     const matrix=record.project.details.findIndex(block=>block.includes('class="delivery-matrix-wrap"'));
     if(matrix<0)throw new Error('Missing deliverable index table.');
@@ -101,7 +106,7 @@ for(const [section,example,index,title,titleZh,instruction,instructionZh] of exa
   const start=record.project.details.indexOf(`<strong class="main-title">${section}</strong>`);
   if(start<0)throw new Error(`Missing example section: ${section}`);
   const end=record.project.details.findIndex((block,index)=>index>start&&block.includes('class="main-title"'));
-  record.project.details.splice(end<0?record.project.details.length:end,0,window);
+  record.project.details.splice(end<0?record.project.details.length:end,0,window,...(example==='storybook'?[moneyNotes]:[]));
 }
 const requirements = [
   'Code delivery, reusable components and responsive layout',
@@ -110,12 +115,14 @@ const requirements = [
   'Loading, no data, errors, long text and permission restrictions',
   'Multiple currencies, local formats, keyboard access and RTL',
 ];
-const conciseStorybook = text('Storybook documents component variants, interaction states and edge cases in light and dark themes. Usage guidelines define expected behavior, helping teams review, reuse and maintain components consistently.','Storybook 集中展示组件变体、交互状态与边界场景，支持深浅主题切换。配套使用规范明确组件行为，便于设计评审、组件复用与后续维护。','p');
+const conciseStorybook = text('Explore component variants, states and themes in Storybook. Change the amount or currency to see the format update.','在 Storybook 中查看组件变体、状态与主题。调整金额或币种，即时查看格式变化。','p');
 const conciseMoneyEn = 'MoneyText keeps currency codes and local grouping. Integer minor units drive totals; refunds show principal, fees and remaining debit. Filters and form states cover search, status and validation.';
 const conciseMoneyZh = 'MoneyText 保留币种代码和本地分组格式。总额按整数最小单位计算；退款拆分本金、费用与剩余扣款。筛选和表单覆盖搜索、状态与校验。';
 const conciseTokensEn = 'Design tokens define color, type, spacing, radius and motion. tokens/tokens.json generates CSS and typed references; light-theme overrides remain in themes.css.';
 record.project.details = record.project.details.map(block => block
   .replace(/<p>src\/stories\/ makes component variants reviewable[\s\S]*?<\/p>/, conciseStorybook)
+  .replace(/<p data-lc-en="Storybook documents component variants,[\s\S]*?<\/p>/, conciseStorybook)
+  .replace(/<p data-lc-en="Explore component variants, states and themes in Storybook\.[^"]*"[\s\S]*?<\/p>/, conciseStorybook)
   .replace(/<p>The Figma ↔ React relationship is documented[\s\S]*?<\/p>/, '')
   .replace(/<p>MoneyText shows ISO currency codes and local grouping\.[\s\S]*?<\/p>/, `<p>${conciseMoneyEn}</p>`)
   .replace(/<p>The drawer separates original debit,[\s\S]*?<\/p>/, '')

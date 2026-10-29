@@ -26,6 +26,7 @@ assert.match(system,/example=system/,'The board must load the actual token and c
 assert.ok(!system.includes('lc-system-node'),'Text-only delivery cards must not replace the visual board.');
 const index=JSON.parse(await readFile(resolve(portfolio,'projects/ledger-console/storybook/index.json'),'utf8'));
 assert.ok(index.entries['components-moneytext--docs'],'Actual Storybook controls documentation must exist.');
+assert.ok(index.entries['components-moneytext--interactive'],'The compact MoneyText story must exist.');
 const example=await readFile(resolve(portfolio,'projects/ledger-console/examples.html'),'utf8');
 assert.ok(!/<script[^>]+src=/.test(example),'The React examples should be self-contained.');
 console.log('Five labelled, lazy-loaded windows resolve; actual Storybook docs and standalone React examples are present.');
